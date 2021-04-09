@@ -34,8 +34,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="include/Chofer.h" />
 		<Unit filename="include/Cliente.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/Chofer.cpp" />
 		<Unit filename="src/Cliente.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

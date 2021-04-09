@@ -1,34 +1,35 @@
 #ifndef CHOFER_H
 #define CHOFER_H
-
+#include<string>
+using std::string;
 
 class Chofer
 {
     public:
         Chofer();
 
-        char GetIdentificacion() { return Identificacion[20]; }
-        void SetIdentificacion(char val) { Identificacion[20] = val; }
-        char GetNombre() { return Nombre[200]; }
-        void SetNombre(char val) { Nombre[200] = val; }
-        char GetApellidos() { return Apellidos[200]; }
-        void SetApellidos(char val) { Apellidos[200] = val; }
-        char GetDireccion() { return Direccion[500]; }
-        void SetDireccion(char val) { Direccion[500] = val; }
-        char GetTelefono() { return Telefono[50]; }
-        void SetTelefono(char val) { Telefono[50] = val; }
-        char GetEmail() { return Email[200]; }
-        void SetEmail(char val) { Email[200] = val; }
+        string GetNumero() { return Numero; }
+        void SetNumero(string val) { Numero = val; }
+        string GetIdentificacion() { return Identificacion; }
+        void SetIdentificacion(string val) { Identificacion = val; }
+        string GetNombre() { return Nombre; }
+        void SetNombre(string val) { Nombre = val; }
+        string GetApellidos() { return Apellidos; }
+        void SetApellidos(string val) { Apellidos = val; }
+        string GetTipoLicencia() { return TipoLicencia; }
+        void SetTipoLicencia(string val) { TipoLicencia = val; }
+        string GetEstado() { return Estado; }
+        void SetEstado(string val) { Estado = val; }
 
     protected:
 
     private:
-        char Identificacion[20];
-        char Nombre[200];
-        char Apellidos[200];
-        char Direccion[500];
-        char Telefono[50];
-        char Email[200];
+        string Numero;
+        string Identificacion;
+        string Nombre;
+        string Apellidos;
+        string TipoLicencia;
+        string Estado;
 };
 
 #endif // CHOFER_H
