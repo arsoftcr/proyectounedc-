@@ -1,8 +1,9 @@
 # depslib dependency file v1.0
-1617940609 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
+1618285554 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
 	<iostream>
 	<stdexcept>
 	<string>
+	<Chofer.h>
 	<Cliente.h>
 	<stdlib.h>
 	<ctype.h>
@@ -29,9 +30,9 @@
 1617941689 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\chofer.h
 	<string>
 
-1617237901 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\src\paquete.cpp
+1618289019 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\src\paquete.cpp
 	"Paquete.h"
 
-1617835023 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquete.h
+1618289039 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquete.h
 	<string>
 

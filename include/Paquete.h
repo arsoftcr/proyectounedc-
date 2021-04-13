@@ -1,36 +1,35 @@
 #ifndef PAQUETE_H
 #define PAQUETE_H
-#include <string>
+#include<string>
 using std::string;
-//Se utiliza std::string  para poder hacer uso  de  el  tipo string  en la clase
 
 class Paquete
 {
     public:
         Paquete();
 
-        int Getnumero() { return numero; }
-        void Setnumero(int val) { numero = val; }
-        char[200] Getfecha() { return fecha; }
-        void Setfecha(char[200] val) { fecha = val; }
-        char[20] Getemisor() { return emisor; }
-        void Setemisor(char[20] val) { emisor = val; }
-        char[20] Getreceptor() { return receptor; }
-        void Setreceptor(char[20] val) { receptor = val; }
-        float Getpeso() { return peso; }
-        void Setpeso(float val) { peso = val; }
-            float Getmonto() { return monto; }
-        void Setmonto(float val) { monto = val; }
+        string GetNumeroEnvio() { return NumeroEnvio; }
+        void SetNumeroEnvio(string val) { NumeroEnvio = val; }
+        string GetFechaRegistro() { return FechaRegistro; }
+        void SetFechaRegistro(string val) { FechaRegistro = val; }
+        string GetClienteEmisor() { return ClienteEmisor; }
+        void SetClienteEmisor(string val) { ClienteEmisor = val; }
+        string GetClienteReceptor() { return ClienteReceptor; }
+        void SetClienteReceptor(string val) { ClienteReceptor = val; }
+        string GetPeso() { return Peso; }
+        void SetPeso(string val) { Peso = val; }
+        string GetMonto() { return Monto; }
+        void SetMonto(string val) { Monto = val; }
 
     protected:
 
     private:
-        int numero;
-        char[200] fecha;
-        char[20] emisor;
-        char[20] receptor;
-        float peso;
-        float monto;
+        string NumeroEnvio;
+        string FechaRegistro;
+        string ClienteEmisor;
+        string ClienteReceptor;
+        string Peso;
+        string Monto;
 };
 
 #endif // PAQUETE_H
