@@ -1,9 +1,10 @@
 # depslib dependency file v1.0
-1618285554 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
+1618555096 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
 	<iostream>
 	<stdexcept>
 	<string>
 	<Chofer.h>
+	<Paquete.h>
 	<Cliente.h>
 	<stdlib.h>
 	<ctype.h>
@@ -17,6 +18,9 @@
 	<fstream>
 	<cstdlib>
 	<vector>
+	<string.h>
+	<algorithm>
+	<time.h>
 
 1617836829 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\src\cliente.cpp
 	"Cliente.h"

@@ -16,6 +16,9 @@
 #include <fstream>
 #include <cstdlib>
 #include <vector>
+#include <string.h>
+#include <algorithm>
+#include <time.h>
 using namespace std;
 
 //PROTOTIPOS
@@ -64,9 +67,14 @@ void ingresoPaquete();
 //************************************MANTENIMIENTO PAQUETES*************************************
 
 //************************************UTILITARIOS*************************************
-bool ValidarSiEsNumero(string cadena);
+bool ValidarSiEsCedula(string cadena);
+bool ValidarSiEsFloat(string cadena);
+bool ValidarSiEsEntero(string cadena);
 bool esCadenaValida(string dato);
-string FechaDelSistema();
+bool ValidarSiEsFecha(string cadena);
+string quitarEspaciosEnBlanco(string cadena);
+bool ValidarSiEsEstado(string cadena);
+bool ValidarSiEsLicencia(string cadena);
 void inicializarArchivos();
 //************************************UTILITARIOS*************************************
 
@@ -89,6 +97,8 @@ struct globales
     string archivoChoferes="chofer.txt";
     string archivoPaquetes="paquete.txt";
     string archivoEnvios="envio.txt";
+    float espacioParaTransportar=0;
+    float espacioMaximo=3000;
 };
 
 //************************************MANTENIMIENTO CLIENTES*************************************
@@ -100,73 +110,88 @@ void modificarCliente()
     string telefono;
     string email;
     string direccion;
-    bool actualizado=false;
     cout << "Ingrese el número de identificación del cliente que desea modificar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+
+    if(esCadenaValida(id))
     {
-        vector<Cliente> clientes=cargarClientes();
-        bool busqueda=busquedaCliente(clientes,id);
-        if(busqueda)
+        id=quitarEspaciosEnBlanco(id);//quitar espacios para evitar inconsistencias
+
+        if(ValidarSiEsCedula(id))
         {
-            Cliente c=RetornarbusquedaCliente(clientes,id);
-            vector<Cliente> clientesXGrabar=removerCliente(clientes,c);
-            cout<< "\nEl nombre actual del cliente es : "<<c.GetNombre()<<endl;
-            cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
-            getline(cin,nombre);
-            if(esCadenaValida(nombre))
+            vector<Cliente> clientes=cargarClientes();
+            bool busqueda=busquedaCliente(clientes,id);
+            if(busqueda)
             {
-                c.SetNombre(nombre);
-            }
-            cout << "\nLos apellidos actuales del cliente son : "<<c.GetApellidos()<<endl;
-            cout << "Digite los nuevos apellidos o presione enter para mantener los mismos apellidos"<<endl;
-            getline(cin,apellidos);
-            if(esCadenaValida(apellidos))
-            {
-                c.SetApellidos(apellidos);
-            }
-            cout << "\nLa direccion actual del cliente es : "<<c.GetDireccion()<<endl;
-            cout << "Digite la nueva direccion o presione enter para mantener la misma direccion"<<endl;
-            getline(cin,direccion);
-            if(esCadenaValida(direccion))
-            {
-                c.SetDireccion(direccion);
-            }
-            cout << "\nEl email actual del cliente es : "<<c.GetEmail()<<endl;
-            cout << "Digite el nuevo email o presione enter para mantener el mismo email"<<endl;
-            getline(cin,email);
-            if(esCadenaValida(email))
-            {
-                c.SetEmail(email);
-            }
-            cout << "\nEl telefono actual del cliente es : "<<c.GetTelefono()<<endl;
-            cout << "Digite el nuevo telefono o presione enter para mantener el mismo telefono"<<endl;
-            getline(cin,telefono);
-            if(esCadenaValida(telefono))
-            {
-                c.SetTelefono(telefono);
-            }
-            clientesXGrabar.push_back(c);
-            bool grabado=grabarClientes(clientesXGrabar);
-            if(grabado)
-            {
-                cout << "El cliente con la identificación : "<<c.GetIdentificacion()<<" ha sido modificado satisfactoriamente"<<endl;
+                Cliente c=RetornarbusquedaCliente(clientes,id);
+                vector<Cliente> clientesXGrabar=removerCliente(clientes,c);
+                cout<< "\nEl nombre actual del cliente es : "<<c.GetNombre()<<endl;
+                cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
+                getline(cin,nombre);
+                if(esCadenaValida(nombre))
+                {
+                    nombre=quitarEspaciosEnBlanco(nombre);
+                    c.SetNombre(nombre);
+                }
+                cout << "\nLos apellidos actuales del cliente son : "<<c.GetApellidos()<<endl;
+                cout << "Digite los nuevos apellidos o presione enter para mantener los mismos apellidos"<<endl;
+                getline(cin,apellidos);
+                if(esCadenaValida(apellidos))
+                {
+                    apellidos=quitarEspaciosEnBlanco(apellidos);
+                    c.SetApellidos(apellidos);
+                }
+                cout << "\nLa direccion actual del cliente es : "<<c.GetDireccion()<<endl;
+                cout << "Digite la nueva direccion o presione enter para mantener la misma direccion"<<endl;
+                getline(cin,direccion);
+                if(esCadenaValida(direccion))
+                {
+                    direccion=quitarEspaciosEnBlanco(direccion);
+                    c.SetDireccion(direccion);
+                }
+                cout << "\nEl email actual del cliente es : "<<c.GetEmail()<<endl;
+                cout << "Digite el nuevo email o presione enter para mantener el mismo email"<<endl;
+                getline(cin,email);
+                if(esCadenaValida(email))
+                {
+                    email=quitarEspaciosEnBlanco(email);
+                    c.SetEmail(email);
+                }
+                cout << "\nEl telefono actual del cliente es : "<<c.GetTelefono()<<endl;
+                cout << "Digite el nuevo telefono o presione enter para mantener el mismo telefono"<<endl;
+                getline(cin,telefono);
+                if(esCadenaValida(telefono))
+                {
+                    telefono=quitarEspaciosEnBlanco(telefono);
+                    c.SetTelefono(telefono);
+                }
+
+                clientesXGrabar.push_back(c);
+                bool grabado=grabarClientes(clientesXGrabar);
+                if(grabado)
+                {
+                    cout << "El cliente con la identificación : "<<c.GetIdentificacion()<<" ha sido modificado satisfactoriamente"<<endl;
+                }
+                else
+                {
+                    cout << "El cliente no pudo ser modificado por un problema desconocido"<<endl;
+                }
             }
             else
             {
-                cout << "El cliente no pudo ser modificado por un problema desconocido"<<endl;
+                cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
             }
         }
         else
         {
             cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
         }
-
     }
     else
     {
         cout << "El dato ingresado no es válido"<<endl;
     }
+
 }
 vector<Cliente> removerCliente(vector<Cliente> clientes,Cliente aborrar)
 {
@@ -183,31 +208,41 @@ vector<Cliente> removerCliente(vector<Cliente> clientes,Cliente aborrar)
 void eliminarCliente()
 {
     string id;
-    bool actualizado=false;
     cout << "Ingrese el número de identificación del cliente que desea eliminar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+
+    if(esCadenaValida(id))
     {
-        vector<Cliente> clientes=cargarClientes();
-        bool busqueda=busquedaCliente(clientes,id);
-        if(busqueda)
+        id=quitarEspaciosEnBlanco(id);
+
+        if(ValidarSiEsCedula(id))
         {
-            Cliente c=RetornarbusquedaCliente(clientes,id);
-            vector<Cliente> clientesXGrabar=removerCliente(clientes,c);
-            bool grabado=grabarClientes(clientesXGrabar);
-            if(grabado)
+            vector<Cliente> clientes=cargarClientes();
+            bool busqueda=busquedaCliente(clientes,id);
+            if(busqueda)
             {
-                cout << "El cliente con la identificación : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
+                Cliente c=RetornarbusquedaCliente(clientes,id);
+                vector<Cliente> clientesXGrabar=removerCliente(clientes,c);
+                bool grabado=grabarClientes(clientesXGrabar);
+                if(grabado)
+                {
+                    cout << "El cliente con la identificación : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
+                }
+                else
+                {
+                    cout << "El cliente no pudo ser modificado por un problema desconocido"<<endl;
+                }
             }
             else
             {
-                cout << "El cliente no pudo ser modificado por un problema desconocido"<<endl;
+                cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
             }
         }
         else
         {
             cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
         }
+
 
     }
     else
@@ -220,26 +255,36 @@ void buscarCliente()
     string id;
     cout << "Ingrese el número de identificación del cliente que desea buscar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Cliente> clientes=cargarClientes();
-        bool busqueda=busquedaCliente(clientes,id);
-        if(busqueda)
+        id=quitarEspaciosEnBlanco(id);
+
+        if(ValidarSiEsCedula(id))
         {
-            Cliente c=RetornarbusquedaCliente(clientes,id);
-            cout
-                    << "\nIdentificación : "<<c.GetIdentificacion()
-                    << "\nNombre : "<<c.GetNombre()
-                    << "\nApellidos : "<<c.GetApellidos()
-                    << "\nDirección : "<<c.GetDireccion()
-                    << "\nEmail : "<<c.GetEmail()
-                    << "\nTeléfono : "<<c.GetTelefono()
-                    <<endl;
+            vector<Cliente> clientes=cargarClientes();
+            bool busqueda=busquedaCliente(clientes,id);
+            if(busqueda)
+            {
+                Cliente c=RetornarbusquedaCliente(clientes,id);
+                cout
+                        << "\nIdentificación : "<<c.GetIdentificacion()
+                        << "\nNombre : "<<c.GetNombre()
+                        << "\nApellidos : "<<c.GetApellidos()
+                        << "\nDirección : "<<c.GetDireccion()
+                        << "\nEmail : "<<c.GetEmail()
+                        << "\nTeléfono : "<<c.GetTelefono()
+                        <<endl;
+            }
+            else
+            {
+                cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
+            }
         }
         else
         {
             cout << "No se encontró ningún cliente con la identificación : "<<id<<endl;
         }
+
 
     }
     else
@@ -306,6 +351,7 @@ vector<Cliente> cargarClientes()
 
 bool busquedaCliente(vector<Cliente> clientes,string dato)
 {
+    dato=quitarEspaciosEnBlanco(dato);
     bool resultado=false;
 
     for(Cliente c:clientes)
@@ -323,6 +369,8 @@ bool busquedaCliente(vector<Cliente> clientes,string dato)
 
 Cliente RetornarbusquedaCliente(vector<Cliente> clientes,string buscado)
 {
+    buscado=quitarEspaciosEnBlanco(buscado);
+
     Cliente cliente;
     for(Cliente c:clientes)
     {
@@ -371,6 +419,7 @@ bool  grabarClientes(vector<Cliente> clientes)
 }
 void ingresoCliente()
 {
+
     Cliente cliente=Cliente();
     string id;
     string email;
@@ -378,12 +427,13 @@ void ingresoCliente()
     string apellidos;
     string direccion;
     string telefono;
-    cout <<"Ingrese la identificación del cliente,este debe ser un dato numérico y debe contener menos de 11 caracteres"<<endl;
+    cout <<"Ingrese la identificación del cliente,este debe ser un dato numérico y debe contener mas de 8 caracteres y  menos de 11 caracteres"<<endl;
     getline(std::cin,id);
     bool proceso=esCadenaValida(id)?true:false;
+    id=quitarEspaciosEnBlanco(id);
     if(proceso)
     {
-        proceso=ValidarSiEsNumero(id)?true:false;
+        proceso=ValidarSiEsCedula(id)?true:false;
     }
     if(proceso)
     {
@@ -391,30 +441,36 @@ void ingresoCliente()
         cout <<"Ingrese el nombre del cliente"<<endl;
         getline(std::cin,nombre);
         proceso=esCadenaValida(nombre)?true:false;
+
         if(proceso)
         {
+            nombre=quitarEspaciosEnBlanco(nombre);
 
             cout <<"Ingrese los apellidos del cliente"<<endl;
             getline(std::cin,apellidos);
             proceso=esCadenaValida(apellidos)?true:false;
             if(proceso)
             {
-
+                apellidos=quitarEspaciosEnBlanco(apellidos);
                 cout <<"Ingrese la dirección del cliente"<<endl;
                 getline(std::cin,direccion);
                 proceso=esCadenaValida(direccion)?true:false;
                 if(proceso)
                 {
-
+                    direccion=quitarEspaciosEnBlanco(direccion);
                     cout <<"Ingrese el  teléfono del cliente"<<endl;
                     getline(std::cin,telefono);
                     proceso=esCadenaValida(telefono)?true:false;
                     if(proceso)
                     {
-
+                        telefono=quitarEspaciosEnBlanco(telefono);
                         cout <<"Ingrese el  email del cliente"<<endl;
                         getline(std::cin,email);
                         proceso=esCadenaValida(email)?true:false;
+                        if(proceso)
+                        {
+                            email=quitarEspaciosEnBlanco(email);
+                        }
                     }
                 }
             }
@@ -425,10 +481,10 @@ void ingresoCliente()
     {
         vector<Cliente> clientes=cargarClientes();
 
-        cliente.SetIdentificacion(id);
+        cliente.SetIdentificacion(quitarEspaciosEnBlanco(id));
         cliente.SetApellidos(apellidos);
         cliente.SetDireccion(direccion);
-        cliente.SetEmail(email);
+        cliente.SetEmail(quitarEspaciosEnBlanco(email));
         cliente.SetNombre(nombre);
         cliente.SetTelefono(telefono);
 
@@ -471,60 +527,65 @@ void modificarChofer()
     string numero;
     string estado;
     string tipo;
-    bool actualizado=false;
-    cout << "Ingrese el número de identificación del chofer que desea modificar"<<endl;
+    cout << "Ingrese el número de identificacion del chofer que desea modificar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Chofer> chofers=cargarChofers();
-        bool busqueda=busquedaChofer(chofers,id);
-        if(busqueda)
+        if(ValidarSiEsEntero(id))
         {
-            Chofer c=RetornarbusquedaChofer(chofers,id);
-            vector<Chofer> chofersXGrabar=removerChofer(chofers,c);
-            cout<< "\nEl nombre actual del chofer es : "<<c.GetNombre()<<endl;
-            cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
-            getline(cin,nombre);
-            if(esCadenaValida(nombre))
+            id=quitarEspaciosEnBlanco(id);
+            vector<Chofer> chofers=cargarChofers();
+            bool busqueda=busquedaChofer(chofers,id);
+            if(busqueda)
             {
-                c.SetNombre(nombre);
-            }
-            cout << "\nLos apellidos actuales del chofer son : "<<c.GetApellidos()<<endl;
-            cout << "Digite los nuevos apellidos o presione enter para mantener los mismos apellidos"<<endl;
-            getline(cin,apellidos);
-            if(esCadenaValida(apellidos))
-            {
-                c.SetApellidos(apellidos);
-            }
-            cout << "\nEl tipo de licencia actual del chofer es : "<<c.GetTipoLicencia()<<endl;
-            cout << "Digite el nuevo tipo de licencia o presione enter para mantener el mismo tipo"<<endl;
-            getline(cin,tipo);
-            if(esCadenaValida(tipo))
-            {
-                c.SetTipoLicencia(tipo);
-            }
-            cout << "\nEl estado actual del chofer es : "<<c.GetEstado()<<endl;
-            cout << "Digite el nuevo estado o presione enter para mantener el mismo estado. Ingrese un 1 para indicar que está activo o ingrese un 2 para indicar que esta inactivo"<<endl;
-            getline(cin,estado);
-            if(esCadenaValida(estado))
-            {
-                c.SetEstado(estado);
-            }
+                Chofer c=RetornarbusquedaChofer(chofers,id);
+                vector<Chofer> chofersXGrabar=removerChofer(chofers,c);
+                cout<< "\nEl tipo de licencia actual del chofer es : "<<c.GetTipoLicencia()<<endl;
+                cout << "Digite el nuevo tipo de licencia o presione enter para mantener el mismo tipo."
+                     <<"Los valores validos son: B2,E2";
+                getline(cin,tipo);
+                if(esCadenaValida(tipo))
+                {
+                    if(ValidarSiEsLicencia(tipo))
+                    {
+                        tipo=quitarEspaciosEnBlanco(tipo);
+                        c.SetTipoLicencia(tipo);
+                    }
 
-            chofersXGrabar.push_back(c);
-            bool grabado=grabarChofers(chofersXGrabar);
-            if(grabado)
-            {
-                cout << "El chofer con la identificación : "<<c.GetIdentificacion()<<" ha sido modificado satisfactoriamente"<<endl;
+                }
+                cout << "\nEl estado actual del chofer es : "<<c.GetEstado()<<endl;
+                cout << "Digite el nuevo estado o presione enter para mantener el mismo estado. Ingrese un 1 para indicar que está activo o ingrese un 2 para indicar que esta inactivo"<<endl;
+                getline(cin,estado);
+                if(esCadenaValida(estado))
+                {
+                    if(ValidarSiEsEstado(estado))
+                    {
+                        estado=quitarEspaciosEnBlanco(estado);
+                        c.SetEstado(estado);
+                    }
+                }
+
+                chofersXGrabar.push_back(c);
+                bool grabado=grabarChofers(chofersXGrabar);
+                if(grabado)
+                {
+                    cout << "El chofer con la identificación : "<<c.GetIdentificacion()<<" ha sido modificado satisfactoriamente"<<endl;
+                }
+                else
+                {
+                    cout << "El chofer no pudo ser modificado por un problema desconocido"<<endl;
+                }
             }
             else
             {
-                cout << "El chofer no pudo ser modificado por un problema desconocido"<<endl;
+                cout << "No se encontró ningún chofer con la identificación : "<<id<<endl;
             }
+
         }
         else
         {
-            cout << "No se encontró ningún chofer con la identificación : "<<id<<endl;
+
+            cout << "El dato ingresado no es válido"<<endl;
         }
 
     }
@@ -548,31 +609,40 @@ vector<Chofer> removerChofer(vector<Chofer> chofers,Chofer aborrar)
 void eliminarChofer()
 {
     string id;
-    bool actualizado=false;
-    cout << "Ingrese el número de identificación del chofer que desea eliminar"<<endl;
+    cout << "Ingrese el número de identificacion del chofer que desea eliminar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Chofer> chofers=cargarChofers();
-        bool busqueda=busquedaChofer(chofers,id);
-        if(busqueda)
+        id=quitarEspaciosEnBlanco(id);
+        if(ValidarSiEsEntero(id))
         {
-            Chofer c=RetornarbusquedaChofer(chofers,id);
-            vector<Chofer> chofersXGrabar=removerChofer(chofers,c);
-            bool grabado=grabarChofers(chofersXGrabar);
-            if(grabado)
+
+            vector<Chofer> chofers=cargarChofers();
+            bool busqueda=busquedaChofer(chofers,id);
+            if(busqueda)
             {
-                cout << "El chofer con la identificación : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
+                Chofer c=RetornarbusquedaChofer(chofers,id);
+                vector<Chofer> chofersXGrabar=removerChofer(chofers,c);
+                bool grabado=grabarChofers(chofersXGrabar);
+                if(grabado)
+                {
+                    cout << "El chofer con el numero : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
+                }
+                else
+                {
+                    cout << "El chofer no pudo ser modificado por un problema desconocido"<<endl;
+                }
             }
             else
             {
-                cout << "El chofer no pudo ser modificado por un problema desconocido"<<endl;
+                cout << "No se encontró ningún chofer con el numero de identificacion: "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún chofer con la identificación : "<<id<<endl;
+            cout << "No se encontró ningún chofer con el numero de identificacion: "<<id<<endl;
         }
+
 
     }
     else
@@ -583,28 +653,37 @@ void eliminarChofer()
 void buscarChofer()
 {
     string id;
-    cout << "Ingrese el número de identificación del chofer que desea buscar"<<endl;
+    cout << "Ingrese el número de identificacion  del chofer que desea buscar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Chofer> chofers=cargarChofers();
-        bool busqueda=busquedaChofer(chofers,id);
-        if(busqueda)
+        id=quitarEspaciosEnBlanco(id);
+        if(ValidarSiEsEntero(id))
         {
-            Chofer c=RetornarbusquedaChofer(chofers,id);
-            cout
-                    << "\nIdentificación : "<<c.GetIdentificacion()
-                    << "\nNombre : "<<c.GetNombre()
-                    << "\nApellidos : "<<c.GetApellidos()
-                    << "\nNumero : "<<c.GetNumero()
-                    << "\nEstado : "<<c.GetEstado()
-                    << "\nTipo de licencia : "<<c.GetTipoLicencia()
-                    <<endl;
+            vector<Chofer> chofers=cargarChofers();
+            bool busqueda=busquedaChofer(chofers,id);
+            if(busqueda)
+            {
+                Chofer c=RetornarbusquedaChofer(chofers,id);
+                cout
+                        << "\nIdentificación : "<<c.GetIdentificacion()
+                        << "\nNombre : "<<c.GetNombre()
+                        << "\nApellidos : "<<c.GetApellidos()
+                        << "\nNumero : "<<c.GetNumero()
+                        << "\nEstado : "<<c.GetEstado()
+                        << "\nTipo de licencia : "<<c.GetTipoLicencia()
+                        <<endl;
+            }
+            else
+            {
+                cout << "No se encontró ningún chofer con el numero  : "<<id<<endl;
+            }
         }
         else
         {
-            cout << "No se encontró ningún chofer con la identificación : "<<id<<endl;
+            cout << "No se encontró ningún chofer con el numero  : "<<id<<endl;
         }
+
 
     }
     else
@@ -672,6 +751,7 @@ vector<Chofer> cargarChofers()
 bool busquedaChofer(vector<Chofer> chofers,string dato)
 {
     bool resultado=false;
+    dato=quitarEspaciosEnBlanco(dato);
 
     for(Chofer c:chofers)
     {
@@ -689,6 +769,7 @@ bool busquedaChofer(vector<Chofer> chofers,string dato)
 Chofer RetornarbusquedaChofer(vector<Chofer> chofers,string buscado)
 {
     Chofer chofer;
+    buscado=quitarEspaciosEnBlanco(buscado);
     for(Chofer c:chofers)
     {
         if(c.GetIdentificacion()==buscado)
@@ -736,109 +817,123 @@ bool  grabarChofers(vector<Chofer> chofers)
 }
 void ingresoChofer()
 {
-    Chofer chofer=Chofer();
-    string id;
-    string estado;
-    string nombre;
-    string apellidos;
-    string numero;
-    string tipo;
-    cout <<"Ingrese la identificación del chofer,este debe ser un dato numérico y debe contener menos de 11 caracteres"<<endl;
-    getline(std::cin,id);
-    bool proceso=esCadenaValida(id)?true:false;
-    if(proceso)
+    try
     {
-        proceso=ValidarSiEsNumero(id)?true:false;
-    }
+        Chofer chofer=Chofer();
+        string id;
+        string estado;
+        string nombre;
+        string apellidos;
+        string numero;
+        string tipo;
+        cout <<"Ingrese la identificación del chofer,este debe ser un dato numérico y debe contener mas de 8 caracteres y  menos de 11 caracteres"<<endl;
+        getline(std::cin,id);
+        bool proceso=esCadenaValida(id)?true:false;
+        if(proceso)
+        {
+            id=quitarEspaciosEnBlanco(id);
+            proceso=ValidarSiEsCedula(id)?true:false;
+        }
 
-    if(proceso)
-    {
-
-        cout <<"Ingrese el nombre del chofer"<<endl;
-        getline(std::cin,nombre);
-        proceso=esCadenaValida(nombre)?true:false;
         if(proceso)
         {
 
-            cout <<"Ingrese los apellidos del chofer"<<endl;
-            getline(std::cin,apellidos);
-            proceso=esCadenaValida(apellidos)?true:false;
+            cout <<"Ingrese el nombre del chofer"<<endl;
+            getline(std::cin,nombre);
+            proceso=esCadenaValida(nombre)?true:false;
             if(proceso)
             {
-
-
-                cout <<"Ingrese el  tipo de licencia del chofer"<<endl;
-                getline(std::cin,tipo);
-                proceso=esCadenaValida(tipo)?true:false;
+                nombre=quitarEspaciosEnBlanco(nombre);
+                cout <<"Ingrese los apellidos del chofer"<<endl;
+                getline(std::cin,apellidos);
+                proceso=esCadenaValida(apellidos)?true:false;
                 if(proceso)
                 {
-
-                    cout <<"Ingrese el  estado del chofer. Ingrese un 1 para indicar que está activo o ingrese un 2 para indicar que esta inactivo"<<endl;
-                    getline(std::cin,estado);
-                    proceso=esCadenaValida(estado)?true:false;
+                    apellidos=quitarEspaciosEnBlanco(apellidos);
+                    cout <<"Ingrese el  tipo de licencia del chofer."
+                         << "Los valores validos son: B2,E2"<<endl;
+                    getline(std::cin,tipo);
+                    proceso=esCadenaValida(tipo)?true:false;
+                    tipo=quitarEspaciosEnBlanco(tipo);
+                    proceso=ValidarSiEsLicencia(tipo);
                     if(proceso)
                     {
-                        proceso=ValidarSiEsNumero(estado)?true:false;
 
-                        if(estado=="1"||estado=="2")
+                        cout <<"Ingrese el  estado del chofer. Ingrese un 1 para indicar que está activo o ingrese un 2 para indicar que esta inactivo"<<endl;
+                        getline(std::cin,estado);
+                        proceso=esCadenaValida(estado)?true:false;
+                        if(proceso)
                         {
-                            proceso=true;
-                        }
-                        else
-                        {
-                            proceso=false;
-                            cout << "El estado del cliente debe ser 1 o 2" << endl;
+                            estado=quitarEspaciosEnBlanco(estado);
+                            proceso=ValidarSiEsEstado(estado)?true:false;
+
+                            if(proceso==false)
+                            {
+                                cout << "El estado del cliente debe ser 1 o 2" << endl;
+                            }
                         }
                     }
-                }
 
+                }
             }
         }
-    }
 
-    if(proceso)
-    {
-        vector<Chofer> chofers=cargarChofers();
-
-        int autoincremento=0;
-        autoincremento=chofers.size()+1;
-        if(autoincremento<1)
+        if(proceso)
         {
-            autoincremento=1;
-        }
-        numero=to_string(autoincremento);
-        chofer.SetIdentificacion(id);
-        chofer.SetApellidos(apellidos);
-        chofer.SetNumero(numero);
-        chofer.SetEstado(estado);
-        chofer.SetNombre(nombre);
-        chofer.SetTipoLicencia(tipo);
+            vector<Chofer> chofers=cargarChofers();
 
-        bool busqueda=busquedaChofer(chofers,chofer.GetIdentificacion());
+            int autoincremento=0;
+            int ultimo;
 
-        if(busqueda)
-        {
-            cout << "Lo sentimos. No se puede registrar el chofer debido a que ya ha sido registrado anteriormente"<<endl;
-        }
-        else
-        {
-            chofers.push_back(chofer);
-            bool registrado=grabarChofers(chofers);
-            if(registrado)
+            ultimo=chofers.empty()?0:stoll(chofers.at(chofers.size()-1).GetNumero());
+
+
+
+            autoincremento=ultimo+1;
+            if(autoincremento<1)
             {
-                cout<<"El chofer "<<chofer.GetIdentificacion() <<" ha sido registrado satisfactoriamente."<<endl;
+                autoincremento=1;
+            }
+            numero=to_string(autoincremento);
+            chofer.SetIdentificacion(id);
+            chofer.SetApellidos(apellidos);
+            chofer.SetNumero(numero);
+            chofer.SetEstado(estado);
+            chofer.SetNombre(nombre);
+            chofer.SetTipoLicencia(tipo);
 
+            bool busqueda=busquedaChofer(chofers,chofer.GetNumero());
+
+            if(busqueda)
+            {
+                cout << "Lo sentimos. No se puede registrar el chofer debido a que ya ha sido registrado anteriormente"<<endl;
             }
             else
             {
-                cout<<"El chofer "<<chofer.GetIdentificacion() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
+                chofers.push_back(chofer);
+                bool registrado=grabarChofers(chofers);
+                if(registrado)
+                {
+                    cout<<"El chofer "<<chofer.GetIdentificacion() <<" ha sido registrado satisfactoriamente."<<endl;
+
+                }
+                else
+                {
+                    cout<<"El chofer "<<chofer.GetIdentificacion() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
+                }
             }
         }
+        else
+        {
+            cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+        }
     }
-    else
+    catch (const std::out_of_range& oor)
     {
-        cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+        std::cerr <<  oor.what() << '\n';
     }
+
+
 
 }
 //************************************MANTENIMIENTO CHOFERES*************************************
@@ -846,73 +941,90 @@ void ingresoChofer()
 //************************************MANTENIMIENTO PAQUETES*************************************
 void modificarPaquete()
 {
-    string numero;
+    string id;
     string emisor;
     string receptor;
     string fecha;
-    string peso;
-    string monto;
-    bool actualizado=false;
+    vector<Cliente> clientes;
+
     cout << "Ingrese el número del paquete que desea modificar"<<endl;
-    getline(cin,numero);
-//    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
-//    {
-//        vector<Paquete> paquetes=cargarPaquetes();
-//        bool busqueda=busquedaPaquete(paquetes,id);
-//        if(busqueda)
-//        {
-//            Paquete c=RetornarbusquedaPaquete(paquetes,id);
-//            vector<Paquete> paquetesXGrabar=removerPaquete(paquetes,c);
-//            cout<< "\nEl nombre actual del chofer es : "<<c.GetClienteEmisor()<<endl;
-//            cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
-//            getline(cin,nombre);
-//            if(esCadenaValida(nombre))
-//            {
-//                c.SetNombre(nombre);
-//            }
-//            cout << "\nLos apellidos actuales del chofer son : "<<c.GetClienteReceptor()<<endl;
-//            cout << "Digite los nuevos apellidos o presione enter para mantener los mismos apellidos"<<endl;
-//            getline(cin,apellidos);
-//            if(esCadenaValida(apellidos))
-//            {
-//                c.SetApellidos(apellidos);
-//            }
-//            cout << "\nEl tipo de licencia actual del chofer es : "<<c.GetTipoLicencia()<<endl;
-//            cout << "Digite el nuevo tipo de licencia o presione enter para mantener el mismo tipo"<<endl;
-//            getline(cin,tipo);
-//            if(esCadenaValida(tipo))
-//            {
-//                c.SetTipoLicencia(tipo);
-//            }
-//            cout << "\nEl estado actual del chofer es : "<<c.GetEstado()<<endl;
-//            cout << "Digite el nuevo estado o presione enter para mantener el mismo estado. Ingrese un 1 para indicar que está activo o ingrese un 2 para indicar que esta inactivo"<<endl;
-//            getline(cin,estado);
-//            if(esCadenaValida(estado))
-//            {
-//                c.SetEstado(estado);
-//            }
-//
-//            paquetesXGrabar.push_back(c);
-//            bool grabado=grabarPaquetes(paquetesXGrabar);
-//            if(grabado)
-//            {
-//                cout << "El chofer con la identificación : "<<c.GetIdentificacion()<<" ha sido modificado satisfactoriamente"<<endl;
-//            }
-//            else
-//            {
-//                cout << "El chofer no pudo ser modificado por un problema desconocido"<<endl;
-//            }
-//        }
-//        else
-//        {
-//            cout << "No se encontró ningún chofer con la identificación : "<<id<<endl;
-//        }
-//
-//    }
-//    else
-//    {
-//        cout << "El dato ingresado no es válido"<<endl;
-//    }
+    getline(cin,id);
+    if(esCadenaValida(id))
+    {
+        id=quitarEspaciosEnBlanco(id);
+        if(ValidarSiEsEntero(id))
+        {
+            clientes=cargarClientes();
+            vector<Paquete> paquetes=cargarPaquetes();
+            bool busqueda=busquedaPaquete(paquetes,id);
+            if(busqueda)
+            {
+                Paquete c=RetornarbusquedaPaquete(paquetes,id);
+                vector<Paquete> paquetesXGrabar=removerPaquete(paquetes,c);
+                cout<< "\nLa identificacion del cliente que envia  es : "<<c.GetClienteEmisor()<<endl;
+                cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
+                getline(cin,emisor);
+                if(esCadenaValida(emisor))
+                {
+                    emisor=quitarEspaciosEnBlanco(emisor);
+
+                    c.SetClienteEmisor(emisor);
+
+                }
+                cout<< "\nLa identificacion del cliente que recibe  es : "<<c.GetClienteEmisor()<<endl;
+                cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
+                getline(cin,receptor);
+                if(esCadenaValida(receptor))
+                {
+                    receptor=quitarEspaciosEnBlanco(receptor);
+
+                    c.SetClienteReceptor(receptor);
+
+                }
+                cout << "\nLa fecha de registro es : "<<c.GetFechaRegistro()<<endl;
+                cout << "Digite la nueva fecha o presione enter para mantener la misma"<<endl;
+                getline(cin,fecha);
+                if(esCadenaValida(fecha))
+                {
+                    fecha=quitarEspaciosEnBlanco(fecha);
+                    if(ValidarSiEsFecha(fecha))
+                    {
+                        c.SetFechaRegistro(fecha);
+                    }
+                    else
+                    {
+                        cout <<"Se ingreso una fecha invalida"<<endl;
+                    }
+
+                }
+
+                paquetesXGrabar.push_back(c);
+                bool grabado=grabarPaquetes(paquetesXGrabar);
+                if(grabado)
+                {
+                    cout << "El paquete con el numero : " << c.GetNumeroEnvio() << " ha sido modificado satisfactoriamente" << endl;
+                }
+                else
+                {
+                    cout << "El paquete no pudo ser modificado por un problema desconocido"<<endl;
+                }
+            }
+            else
+            {
+                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+            }
+        }
+        else
+        {
+            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+        }
+
+
+    }
+    else
+    {
+        cout << "El dato ingresado no es válido"<<endl;
+    }
 }
 vector<Paquete> removerPaquete(vector<Paquete> paquetes,Paquete aborrar)
 {
@@ -929,31 +1041,38 @@ vector<Paquete> removerPaquete(vector<Paquete> paquetes,Paquete aborrar)
 void eliminarPaquete()
 {
     string id;
-    bool actualizado=false;
     cout << "Ingrese el número  del paquete que desea eliminar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Paquete> paquetes=cargarPaquetes();
-        bool busqueda=busquedaPaquete(paquetes,id);
-        if(busqueda)
+        if(ValidarSiEsEntero(id))
         {
-            Paquete c=RetornarbusquedaPaquete(paquetes,id);
-            vector<Paquete> paquetesXGrabar=removerPaquete(paquetes,c);
-            bool grabado=grabarPaquetes(paquetesXGrabar);
-            if(grabado)
+            vector<Paquete> paquetes=cargarPaquetes();
+            bool busqueda=busquedaPaquete(paquetes,id);
+            if(busqueda)
             {
-                cout << "El paquete con la identificación : "<<c.GetNumeroEnvio()<<" ha sido eliminado satisfactoriamente"<<endl;
+                Paquete c=RetornarbusquedaPaquete(paquetes,id);
+                vector<Paquete> paquetesXGrabar=removerPaquete(paquetes,c);
+                bool grabado=grabarPaquetes(paquetesXGrabar);
+                if(grabado)
+                {
+                    cout << "El paquete con el numero : "<<c.GetNumeroEnvio()<<" ha sido eliminado satisfactoriamente"<<endl;
+                }
+                else
+                {
+                    cout << "El paquete no pudo ser modificado por un problema desconocido"<<endl;
+                }
             }
             else
             {
-                cout << "El paquete no pudo ser modificado por un problema desconocido"<<endl;
+                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún paquete con la identificación : "<<id<<endl;
+            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
         }
+
 
     }
     else
@@ -966,26 +1085,34 @@ void buscarPaquete()
     string id;
     cout << "Ingrese el número  del paquete que desea buscar"<<endl;
     getline(cin,id);
-    if(esCadenaValida(id)&&ValidarSiEsNumero(id))
+    if(esCadenaValida(id))
     {
-        vector<Paquete> paquetes=cargarPaquetes();
-        bool busqueda=busquedaPaquete(paquetes,id);
-        if(busqueda)
+        if(ValidarSiEsEntero(id))
         {
-            Paquete c=RetornarbusquedaPaquete(paquetes,id);
-            cout
-                    << "\nNumero de paquete : "<<c.GetNumeroEnvio()
-                    << "\nFecha de creacion : "<<c.GetFechaRegistro()
-                    << "\nCliente que envia : "<<c.GetClienteEmisor()
-                    << "\nCliente que recibe : "<<c.GetClienteReceptor()
-                    << "\nPeso: "<<c.GetPeso()
-                    << "\nMonto : "<<c.GetMonto()
-                    <<endl;
+            vector<Paquete> paquetes=cargarPaquetes();
+            bool busqueda=busquedaPaquete(paquetes,id);
+            if(busqueda)
+            {
+                Paquete c=RetornarbusquedaPaquete(paquetes,id);
+                cout
+                        << "\nNumero de paquete : "<<c.GetNumeroEnvio()
+                        << "\nFecha de creacion : "<<c.GetFechaRegistro()
+                        << "\nCliente que envia : "<<c.GetClienteEmisor()
+                        << "\nCliente que recibe : "<<c.GetClienteReceptor()
+                        << "\nPeso: "<<c.GetPeso()
+                        << "\nMonto : "<<c.GetMonto()
+                        <<endl;
+            }
+            else
+            {
+                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+            }
         }
         else
         {
-            cout << "No se encontró ningún paquete con la identificación : "<<id<<endl;
+            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
         }
+
 
     }
     else
@@ -1119,94 +1246,256 @@ bool  grabarPaquetes(vector<Paquete> paquetes)
 }
 void ingresoPaquete()
 {
-    Paquete paquete=Paquete();
-    string numero;
-    string fecha;
-    string emisor;
-    string receptor;
-    string peso;
-    string monto;
-
-    bool proceso=false;
-    cout <<"Ingrese la identificacion del cliente que envia el paquete"<<endl;
-    getline(std::cin,emisor);
-    proceso=esCadenaValida(emisor)?true:false;
-    //BUSCAR CLIENTE AQUI
-    if(proceso)
+    cin.sync();
+    string opc="";
+    try
     {
-
-        cout <<"Ingrese la identificacion del cliente que recibe el paquete"<<endl;
-        getline(std::cin,receptor);
-        proceso=esCadenaValida(receptor)?true:false;
-        //BUSCAR CLIENTE AQUI
+        Paquete paquete=Paquete();
+        string numero;
+        string fecha;
+        string emisor;
+        string receptor;
+        string peso;
+        string monto;
+        float pesoFloat;
+        float montoFloat;
+        vector<Cliente> clientes;
+        bool proceso=false;
+        globales global;
+        cout <<"Ingrese la identificacion del cliente que envia el paquete"<<endl;
+        getline(std::cin,emisor);
+        proceso=esCadenaValida(emisor)?true:false;
         if(proceso)
         {
+            clientes=cargarClientes();
+            emisor=quitarEspaciosEnBlanco(emisor);
+            proceso=busquedaCliente(clientes,emisor);
 
-
-            cout <<"Ingrese el  peso del paquete"<<endl;
-            getline(std::cin,peso);
-            proceso=esCadenaValida(peso)?true:false;
-
-
-        }
-    }
-
-
-    if(proceso)
-    {
-        vector<Paquete> paquetes=cargarPaquetes();
-
-        int autoincremento=0;
-        autoincremento=paquetes.size()+1;
-        if(autoincremento<1)
-        {
-            autoincremento=1;
-        }
-        numero=to_string(autoincremento);
-        paquete.SetNumeroEnvio(numero);
-        paquete.SetClienteEmisor(emisor);
-        paquete.SetClienteReceptor(receptor);
-        paquete.SetFechaRegistro(fecha);
-        paquete.SetPeso(peso);
-        paquete.SetMonto(monto);
-
-        bool busqueda=busquedaPaquete(paquetes,paquete.GetNumeroEnvio());
-
-        if(busqueda)
-        {
-            cout << "Lo sentimos. No se puede registrar el paquete debido a que ya ha sido registrado anteriormente"<<endl;
-        }
-        else
-        {
-            paquetes.push_back(paquete);
-            bool registrado=grabarPaquetes(paquetes);
-            if(registrado)
+            if(proceso)
             {
-                cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" ha sido registrado satisfactoriamente."<<endl;
+
+                cout <<"Ingrese la fecha de registro. La fecha debe apegarse al siguiente formato: dd/mm/yyyy"<<endl;
+                getline(std::cin,fecha);
+                proceso=esCadenaValida(fecha)?true:false;
+                if(proceso)
+                {
+                    proceso=ValidarSiEsFecha(fecha);
+                    if(proceso)
+                    {
+                        cout <<"Ingrese la identificacion del cliente que recibe el paquete"<<endl;
+                        getline(std::cin,receptor);
+                        proceso=esCadenaValida(receptor)?true:false;
+                        receptor=quitarEspaciosEnBlanco(receptor);
+                        proceso=busquedaCliente(clientes,receptor);
+
+                        if(proceso)
+                        {
+                            cout <<"Ingrese el  peso del paquete en kilogramos por favor.El peso limite son 1000 kilos"<<endl;
+                            getline(std::cin,peso);
+                            proceso=esCadenaValida(peso)?true:false;
+
+                            if(proceso)
+                            {
+                                bool proceso=ValidarSiEsFloat(peso);
+
+                                if(proceso)
+                                {
+
+                                    float espacio=(global.espacioMaximo)-(global.espacioParaTransportar);
+                                    if(espacio>0)
+                                    {
+                                        pesoFloat=std::stof(peso);
+                                        if(pesoFloat<=1000)
+                                        {
+                                            global.espacioParaTransportar=
+                                                global.espacioParaTransportar+pesoFloat;
+
+                                            montoFloat=100*pesoFloat;
+
+                                        }
+                                        else
+                                        {
+                                            cout << "El peso ingresado es invalido"<<endl;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        cout << "Ya no hay espacio para transportar."<<endl;
+                                    }
+                                }
+                                else
+                                {
+                                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                                }
+
+                            }
+                            else
+                            {
+                                cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                            }
+                        }
+                        else
+                        {
+
+
+                            cout <<"El cliente ingresado no ha sido previamente registrado.Desea registrarlo ahora? S/N"<<endl;
+                            getline(std::cin,opc);
+                            cout <<opc<<endl;
+                            if(esCadenaValida(opc))
+                            {
+
+                                if(opc=="s"||opc=="S")
+                                {
+                                    ingresoCliente();
+                                }
+                                else
+                                {
+                                    cout<<"Presione una tecla para continuar"<<endl;
+                                }
+
+                            }
+                            else
+                            {
+                                cout <<"Se ingreso un valor invalido"<< endl;
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                        cout <<"El cliente ingresado no ha sido previamente registrado.Desea registrarlo ahora? S/N"<<endl;
+                        getline(std::cin,opc);
+                        cout <<opc<<endl;
+                        if(esCadenaValida(opc))
+                        {
+                            if(opc=="s"||opc=="S")
+                            {
+                                ingresoCliente();
+                            }
+                            else
+                            {
+                                cout<<"Presione una tecla para continuar"<<endl;
+                            }
+                        }
+                        else
+                        {
+                            cout <<"Se ingreso un valor invalido"<< endl;
+                        }
+                    }
+                }
+                else
+                {
+                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                }
 
             }
             else
             {
-                cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
+                string opc;
+                cout <<"El cliente ingresado no ha sido previamente registrado"
+                     <<".Desea registrarlo ahora? S/N";
+                getline(cin,opc);
+                if(esCadenaValida(opc))
+                {
+                    ingresoCliente();
+                }
+                else
+                {
+                    cout <<"Se ingreso un valor invalido"<< endl;
+                }
+            }
+
+
+        }
+        else
+        {
+            cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+        }
+
+
+        if(proceso)
+        {
+            vector<Paquete> paquetes=cargarPaquetes();
+
+            int autoincremento=0;
+            int ultimo;
+
+            ultimo=paquetes.empty()?0:stoll(paquetes.at(paquetes.size()-1).GetNumeroEnvio());
+
+
+
+            autoincremento=ultimo+1;
+            if(autoincremento<1)
+            {
+                autoincremento=1;
+            }
+            numero=to_string(autoincremento);
+            paquete.SetNumeroEnvio(numero);
+            paquete.SetClienteEmisor(emisor);
+            paquete.SetClienteReceptor(receptor);
+            paquete.SetFechaRegistro(fecha);
+            paquete.SetPeso(to_string(pesoFloat));
+            paquete.SetMonto(to_string(montoFloat));
+
+            bool busqueda=busquedaPaquete(paquetes,paquete.GetNumeroEnvio());
+
+            if(busqueda)
+            {
+                cout << "Lo sentimos. No se puede registrar el paquete debido a que ya ha sido registrado anteriormente"<<endl;
+            }
+            else
+            {
+                paquetes.push_back(paquete);
+                bool registrado=grabarPaquetes(paquetes);
+                if(registrado)
+                {
+                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" ha sido registrado satisfactoriamente."<<endl;
+
+                }
+                else
+                {
+                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
+                }
             }
         }
+        else
+        {
+            cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+        }
     }
-    else
+    catch (const std::out_of_range& oor)
     {
-        cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+        std::cerr <<  oor.what() << '\n';
     }
+
 
 }
 //************************************MANTENIMIENTO PAQUETES*************************************
 
 
 //************************************UTILITARIOS*************************************
-bool ValidarSiEsNumero(string cadena)
+
+bool ValidarSiEsFloat(string cadena)
 {
     bool EsNumero=true;
     try
     {
-        if(cadena.size()<11)
+        float numero=std::stof(cadena);
+
+    }
+    catch(const std::invalid_argument &no_es_numero)
+    {
+        EsNumero=false;
+    }
+
+    return EsNumero;
+}
+bool ValidarSiEsCedula(string cadena)
+{
+    bool EsNumero=true;
+    try
+    {
+        if(cadena.size()<11&&cadena.size()>8)
         {
             int entero=stoll(cadena);
         }
@@ -1220,6 +1509,26 @@ bool ValidarSiEsNumero(string cadena)
     catch(const std::invalid_argument &no_es_numero)
     {
 
+        EsNumero=false;
+    }
+
+    return EsNumero;
+}
+bool ValidarSiEsEntero(string cadena)
+{
+    bool EsNumero=true;
+    int conteo=0;
+    for(int i=0; i<cadena.size()-1; i++)
+    {
+        if(isdigit(cadena[i]))
+        {
+            conteo++;
+
+        }
+    }
+
+    if(conteo!=(cadena.size()-1))
+    {
         EsNumero=false;
     }
 
@@ -1258,16 +1567,77 @@ bool esCadenaValida(string dato)
 
     }
 }
-string FechaDelSistema()
+bool ValidarSiEsFecha(string cadena)
 {
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
+    bool proceso=false;
+    std::tm tm;
 
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%d-%m-%Y");
-    string str = oss.str();
+    if (stringstream(cadena) >> std::get_time(&tm, "%d/%m/%Y"))
+    {
+        proceso=true;
+    }
+    else
+    {
+        proceso=false;
+    }
+    return proceso;
+}
+string quitarEspaciosEnBlanco(string cadena)
+{
+    std::remove_if(cadena.begin(), cadena.end(), ::isspace);
+    return cadena;
+}
+bool ValidarSiEsEstado(string cadena)
+{
+    bool proceso=true;
 
-    return str;
+    if(cadena.size()>0&&cadena.size()<2)
+    {
+        proceso=ValidarSiEsEntero(cadena);
+
+        if(proceso)
+        {
+            if(cadena=="1"||cadena=="2")
+            {
+                proceso=true;
+            }
+            else
+            {
+                proceso=false;
+            }
+        }
+
+    }
+    else
+    {
+        proceso=false;
+    }
+
+
+
+    return proceso;
+}
+bool ValidarSiEsLicencia(string cadena)
+{
+    bool proceso=true;
+
+    if(cadena.size()>0&&cadena.size()<3)
+    {
+        if(cadena=="b2"||cadena=="B2"||cadena=="e2"||cadena=="E2")
+        {
+            proceso=true;
+        }
+        else
+        {
+            proceso=false;
+        }
+    }
+    else
+    {
+        proceso=false;
+    }
+
+    return proceso;
 }
 void inicializarArchivos()
 {
@@ -1300,6 +1670,26 @@ void inicializarArchivos()
         if(global.escritura.fail())
         {
             cout <<"no se pudo crear el archivo de choferes";
+            exit(1);
+        }
+        else
+        {
+            global.escritura.close();
+        }
+    }
+    else
+    {
+        global.lectura.close();
+    }
+
+
+    global.lectura.open(global.archivoPaquetes,ios::in);
+    if(global.lectura.fail())
+    {
+        global.escritura.open(global.archivoPaquetes,ios::out);
+        if(global.escritura.fail())
+        {
+            cout <<"no se pudo crear el archivo de paquetes";
             exit(1);
         }
         else
@@ -1372,7 +1762,7 @@ void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
         do
         {
             cin.sync();
-            ingresoChofer();
+            ingresoPaquete();
             cout << "Desea ingresar mas paquetes? S/N" << endl;
             cin >> seguir;
 
@@ -1382,16 +1772,16 @@ void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
 
     break;
     case 2:
-        modificarChofer();
+        modificarPaquete();
         break;
     case 3:
-        listarChofers();
+        listarPaquetes();
         break;
     case 4:
-        buscarChofer();
+        buscarPaquete();
         break;
     case 5:
-        eliminarChofer();
+        eliminarPaquete();
         break;
     default:
         cout << "Solicitud desconocida\n\n\n";
@@ -1455,7 +1845,7 @@ int MostrarMenu()
     cin >> option;
 
 
-    if(ValidarSiEsNumero(option))
+    if(ValidarSiEsEntero(option))
     {
         intOpcion=stoll(option);
     }
@@ -1476,14 +1866,14 @@ int MostrarMenuClientes()
     cout << "[6] Volver al menú principal" << endl;
     cin >> option;
 
-    if(ValidarSiEsNumero(option))
+    if(ValidarSiEsEntero(option))
     {
         intOpcion=stoll(option);
     }
     return intOpcion;
 }
 int MostrarMenuChoferes()
-{
+{ cin.sync();
     string option;
     int intOpcion = 0;
     cout << "////////////////////////////////////////////" << endl;
@@ -1496,7 +1886,7 @@ int MostrarMenuChoferes()
     cout << "[6] Volver al menú principal" << endl;
     cin >> option;
 
-    if(ValidarSiEsNumero(option))
+    if(ValidarSiEsEntero(option))
     {
         intOpcion=stoll(option);
     }
@@ -1504,7 +1894,7 @@ int MostrarMenuChoferes()
 }
 
 int MostrarMenuPaquetes()
-{
+{ cin.sync();
     string option;
     int intOpcion = 0;
     cout << "////////////////////////////////////////////" << endl;
@@ -1517,7 +1907,7 @@ int MostrarMenuPaquetes()
     cout << "[6] Volver al menú principal" << endl;
     cin >> option;
 
-    if(ValidarSiEsNumero(option))
+    if(ValidarSiEsEntero(option))
     {
         intOpcion=stoll(option);
     }
@@ -1568,7 +1958,7 @@ void ProcesamientoDeDatos(int eleccion)
         EscucharOpcionesClientes();
         break;
     case 3:
-        cout << "Envío de paquetes\n\n\n";
+        EscucharOpcionesPaquetes();
         break;
     case 4:
         cout << "Cierre de envios\n\n\n";
@@ -1577,7 +1967,6 @@ void ProcesamientoDeDatos(int eleccion)
         cout << "Reportes\n\n\n";
         break;
     case 6:
-        cout << "Salir\n\n\n";
         exit(1);
         break;
     default:
@@ -1604,7 +1993,9 @@ void EscucharOpciones()
 
 int main()
 {
+    string mis;
     setlocale(LC_ALL, "");//para los acentos
+
     inicializarArchivos();
     EscucharOpciones();
     return 0;
