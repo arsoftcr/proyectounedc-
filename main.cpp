@@ -1257,8 +1257,8 @@ void ingresoPaquete()
         string receptor;
         string peso;
         string monto;
-        float pesoFloat;
-        float montoFloat;
+        float pesoFloat=0;
+        float montoFloat=0;
         vector<Cliente> clientes;
         bool proceso=false;
         globales global;
@@ -1270,6 +1270,34 @@ void ingresoPaquete()
             clientes=cargarClientes();
             emisor=quitarEspaciosEnBlanco(emisor);
             proceso=busquedaCliente(clientes,emisor);
+
+            if(!proceso)
+            {
+                cin.sync();
+                string opc;
+                cout <<"El cliente ingresado no ha sido previamente registrado"
+                     <<".Desea registrarlo ahora? S/N"<<endl;
+                getline(cin,opc);
+                if(esCadenaValida(opc))
+                {
+                    if(opc=="s"||opc=="S")
+                    {
+                        ingresoCliente();
+                        proceso=true;
+                    }
+                    else
+                    {
+                        proceso=false;
+                    }
+
+                }
+                else
+                {
+                    proceso=false;
+                    cout <<"Se ingreso un valor invalido"<< endl;
+                }
+
+            }
 
             if(proceso)
             {
@@ -1288,6 +1316,34 @@ void ingresoPaquete()
                         receptor=quitarEspaciosEnBlanco(receptor);
                         proceso=busquedaCliente(clientes,receptor);
 
+                        if(!proceso)
+                        {
+                            cin.sync();
+                            string opc;
+                            cout <<"El cliente ingresado no ha sido previamente registrado"
+                                 <<".Desea registrarlo ahora? S/N"<<endl;
+                            getline(cin,opc);
+                            if(esCadenaValida(opc))
+                            {
+                                if(opc=="s"||opc=="S")
+                                {
+                                    ingresoCliente();
+                                    proceso=true;
+                                }
+                                else
+                                {
+                                    proceso=false;
+                                }
+
+                            }
+                            else
+                            {
+                                proceso=false;
+                                cout <<"Se ingreso un valor invalido"<< endl;
+                            }
+
+                        }
+
                         if(proceso)
                         {
                             cout <<"Ingrese el  peso del paquete en kilogramos por favor.El peso limite son 1000 kilos"<<endl;
@@ -1302,166 +1358,124 @@ void ingresoPaquete()
                                 {
 
                                     float espacio=(global.espacioMaximo)-(global.espacioParaTransportar);
+
                                     if(espacio>0)
                                     {
                                         pesoFloat=std::stof(peso);
                                         if(pesoFloat<=1000)
                                         {
-                                            global.espacioParaTransportar=
-                                                global.espacioParaTransportar+pesoFloat;
+                                            if(pesoFloat<=espacio)
+                                            {
+                                                global.espacioParaTransportar=
+                                                    global.espacioParaTransportar+pesoFloat;
 
-                                            montoFloat=100*pesoFloat;
+                                                if(pesoFloat<1)
+                                                {
+                                                    montoFloat=50;
+                                                }
+                                                else
+                                                {
+                                                    montoFloat=100*pesoFloat;
+                                                }
+
+                                                vector<Paquete> paquetes=cargarPaquetes();
+
+                                                int autoincremento=0;
+                                                int ultimo;
+
+                                                ultimo=paquetes.empty()?0:stoll(paquetes.at(paquetes.size()-1).GetNumeroEnvio());
+
+
+
+                                                autoincremento=ultimo+1;
+                                                if(autoincremento<1)
+                                                {
+                                                    autoincremento=1;
+                                                }
+                                                numero=to_string(autoincremento);
+                                                paquete.SetNumeroEnvio(numero);
+                                                paquete.SetClienteEmisor(emisor);
+                                                paquete.SetClienteReceptor(receptor);
+                                                paquete.SetFechaRegistro(fecha);
+                                                paquete.SetPeso(to_string(pesoFloat));
+                                                paquete.SetMonto(to_string(montoFloat));
+
+
+                                                paquetes.push_back(paquete);
+                                                bool registrado=grabarPaquetes(paquetes);
+                                                if(registrado)
+                                                {
+                                                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" ha sido registrado satisfactoriamente."<<endl;
+
+                                                }
+                                                else
+                                                {
+                                                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                cout<<"No hay espacio para transportar ese peso"<<endl;
+                                                proceso=false;
+                                            }
 
                                         }
                                         else
                                         {
                                             cout << "El peso ingresado es invalido"<<endl;
+                                            proceso=false;
                                         }
                                     }
                                     else
                                     {
                                         cout << "Ya no hay espacio para transportar."<<endl;
+                                        proceso=false;
                                     }
                                 }
                                 else
                                 {
-                                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                                    proceso=false;
                                 }
 
                             }
                             else
                             {
-                                cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                                proceso=false;
                             }
+
                         }
                         else
                         {
-
-
-                            cout <<"El cliente ingresado no ha sido previamente registrado.Desea registrarlo ahora? S/N"<<endl;
-                            getline(std::cin,opc);
-                            cout <<opc<<endl;
-                            if(esCadenaValida(opc))
-                            {
-
-                                if(opc=="s"||opc=="S")
-                                {
-                                    ingresoCliente();
-                                }
-                                else
-                                {
-                                    cout<<"Presione una tecla para continuar"<<endl;
-                                }
-
-                            }
-                            else
-                            {
-                                cout <<"Se ingreso un valor invalido"<< endl;
-                            }
+                            proceso=false;
                         }
                     }
                     else
                     {
-
-                        cout <<"El cliente ingresado no ha sido previamente registrado.Desea registrarlo ahora? S/N"<<endl;
-                        getline(std::cin,opc);
-                        cout <<opc<<endl;
-                        if(esCadenaValida(opc))
-                        {
-                            if(opc=="s"||opc=="S")
-                            {
-                                ingresoCliente();
-                            }
-                            else
-                            {
-                                cout<<"Presione una tecla para continuar"<<endl;
-                            }
-                        }
-                        else
-                        {
-                            cout <<"Se ingreso un valor invalido"<< endl;
-                        }
+                        proceso=false;
                     }
                 }
                 else
                 {
-                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
+                    proceso=false;
                 }
+
 
             }
             else
             {
-                string opc;
-                cout <<"El cliente ingresado no ha sido previamente registrado"
-                     <<".Desea registrarlo ahora? S/N";
-                getline(cin,opc);
-                if(esCadenaValida(opc))
-                {
-                    ingresoCliente();
-                }
-                else
-                {
-                    cout <<"Se ingreso un valor invalido"<< endl;
-                }
+                proceso=false;
             }
 
 
         }
         else
         {
+            proceso=false;
             cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
         }
 
 
-        if(proceso)
-        {
-            vector<Paquete> paquetes=cargarPaquetes();
 
-            int autoincremento=0;
-            int ultimo;
-
-            ultimo=paquetes.empty()?0:stoll(paquetes.at(paquetes.size()-1).GetNumeroEnvio());
-
-
-
-            autoincremento=ultimo+1;
-            if(autoincremento<1)
-            {
-                autoincremento=1;
-            }
-            numero=to_string(autoincremento);
-            paquete.SetNumeroEnvio(numero);
-            paquete.SetClienteEmisor(emisor);
-            paquete.SetClienteReceptor(receptor);
-            paquete.SetFechaRegistro(fecha);
-            paquete.SetPeso(to_string(pesoFloat));
-            paquete.SetMonto(to_string(montoFloat));
-
-            bool busqueda=busquedaPaquete(paquetes,paquete.GetNumeroEnvio());
-
-            if(busqueda)
-            {
-                cout << "Lo sentimos. No se puede registrar el paquete debido a que ya ha sido registrado anteriormente"<<endl;
-            }
-            else
-            {
-                paquetes.push_back(paquete);
-                bool registrado=grabarPaquetes(paquetes);
-                if(registrado)
-                {
-                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" ha sido registrado satisfactoriamente."<<endl;
-
-                }
-                else
-                {
-                    cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" no pudo ser registrado debido a un problema desconocido."<<endl;
-                }
-            }
-        }
-        else
-        {
-            cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
-        }
     }
     catch (const std::out_of_range& oor)
     {
@@ -1873,7 +1887,8 @@ int MostrarMenuClientes()
     return intOpcion;
 }
 int MostrarMenuChoferes()
-{ cin.sync();
+{
+    cin.sync();
     string option;
     int intOpcion = 0;
     cout << "////////////////////////////////////////////" << endl;
@@ -1894,7 +1909,8 @@ int MostrarMenuChoferes()
 }
 
 int MostrarMenuPaquetes()
-{ cin.sync();
+{
+    cin.sync();
     string option;
     int intOpcion = 0;
     cout << "////////////////////////////////////////////" << endl;
@@ -1993,7 +2009,7 @@ void EscucharOpciones()
 
 int main()
 {
-    string mis;
+
     setlocale(LC_ALL, "");//para los acentos
 
     inicializarArchivos();

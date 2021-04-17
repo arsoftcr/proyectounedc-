@@ -5,6 +5,7 @@ using std::string;
 
 class Paquete
 {
+
     public:
         Paquete();
 

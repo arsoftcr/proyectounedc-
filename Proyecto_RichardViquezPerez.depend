@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1618555096 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
+1618643593 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
 	<iostream>
 	<stdexcept>
 	<string>
@@ -37,6 +37,6 @@
 1618289019 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\src\paquete.cpp
 	"Paquete.h"
 
-1618289039 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquete.h
+1618643375 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquete.h
 	<string>
 
