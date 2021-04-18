@@ -1,10 +1,11 @@
 # depslib dependency file v1.0
-1618643593 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
+1618722553 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\main.cpp
 	<iostream>
 	<stdexcept>
 	<string>
 	<Chofer.h>
 	<Paquete.h>
+	<Paquetes_Vehiculos.h>
 	<Cliente.h>
 	<stdlib.h>
 	<ctype.h>
@@ -38,5 +39,11 @@
 	"Paquete.h"
 
 1618643375 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquete.h
+	<string>
+
+1618706816 source:c:\users\rviquez\documents\c++\proyecto_richardviquezperez\src\paquetes_vehiculos.cpp
+	"Paquetes_Vehiculos.h"
+
+1618706836 c:\users\rviquez\documents\c++\proyecto_richardviquezperez\include\paquetes_vehiculos.h
 	<string>
 

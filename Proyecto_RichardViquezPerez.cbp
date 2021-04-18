@@ -37,10 +37,12 @@
 		<Unit filename="include/Chofer.h" />
 		<Unit filename="include/Cliente.h" />
 		<Unit filename="include/Paquete.h" />
+		<Unit filename="include/Paquetes_Vehiculos.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/Chofer.cpp" />
 		<Unit filename="src/Cliente.cpp" />
 		<Unit filename="src/Paquete.cpp" />
+		<Unit filename="src/Paquetes_Vehiculos.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

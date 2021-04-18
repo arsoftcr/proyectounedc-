@@ -3,6 +3,7 @@
 #include <string>
 #include <Chofer.h>
 #include <Paquete.h>
+#include <Paquetes_Vehiculos.h>
 #include <Cliente.h>
 #include <stdlib.h>
 #include<ctype.h>
@@ -34,6 +35,15 @@ Cliente solicitarDatosCliente();
 vector<Cliente> removerCliente(vector<Cliente> clientes,Cliente aborrar);
 //************************************MANTENIMIENTO CLIENTES*************************************
 
+//************************************ESPACIO*************************************
+bool  grabarEspacio(float espacio);
+string cargarEspacio();
+//************************************ESPACIO*************************************
+
+//************************************REPORTES*************************************
+void reportePaquetesXVehiculo();
+void reporteTotales();
+//************************************REPORTES*************************************
 
 //************************************MANTENIMIENTO CHOFERES*************************************
 void modificarChofer();
@@ -48,11 +58,17 @@ bool  grabarChofers(vector<Chofer> chofers);
 void ingresoChofer();
 //************************************MANTENIMIENTO CHOFERES*************************************
 
+//************************************MANTENIMIENTO PAQUETESXVEHICULO*************************************
+bool  grabarEnviados(vector<int> enviados);
+vector<int> cargarEnviados();
+//************************************MANTENIMIENTO PAQUETESXVEHICULO*************************************
+
+
 //************************************MANTENIMIENTO PAQUETES*************************************
 void EscucharOpcionesPaquetes();
 int MostrarMenuPaquetes();
 void ProcesamientoDeDatosSubmenuPaquetes(int solicitud);
-//************************************MANTENIMIENTO PAQUETES*************************************
+void borrarEspacioYPendientes();
 void modificarPaquete();
 vector<Paquete> removerPaquete(vector<Paquete> paquetes,Paquete aborrar);
 void eliminarPaquete();
@@ -97,11 +113,182 @@ struct globales
     string archivoChoferes="chofer.txt";
     string archivoPaquetes="paquete.txt";
     string archivoEnvios="envio.txt";
-    float espacioParaTransportar=0;
+    string archivoEspacio="espacio.txt";
+    string archivoEnviados="enviados.txt";
+    string espacio;
+    vector<int> enviados;
     float espacioMaximo=3000;
 };
 
+//************************************MANTENIMIENTO PAQUETESXVEHICULO*************************************
+//Este método graba en el archivo de envíos los datos de los cierres
+bool  grabarCierre(vector<Paquetes_Vehiculos> cierres)
+{
+    bool resultado=false;
+
+    globales global;
+
+    global.escritura.open(global.archivoEnvios,ios::out);
+
+
+    if(global.escritura.fail())
+    {
+        cout <<"No se pudo abrir el archivo";
+        exit(1);
+    }
+
+    for(Paquetes_Vehiculos pe:cierres)
+    {
+        global.escritura
+                << pe.GetVehiculo()<<' '
+                << pe.GetChofer()<<' '
+                << pe.GetEnvio()<<' ';
+    }
+
+
+    global.escritura.flush();
+    global.escritura.close();
+    resultado=true;
+
+
+    return resultado;
+}
+//Este método carga todos los datos del archivo de cierres
+vector<Paquetes_Vehiculos> cargarCierre()
+{
+    globales global;
+    vector<Paquetes_Vehiculos> cerrados;
+    global.lectura.open(global.archivoEnvios,ios::in);
+    if(global.lectura.fail())
+    {
+        cout << "No se pudo abrir el archivo";
+        exit(1);
+    }
+    string vehiculo;
+    string chofer;
+    string envio;
+    Paquetes_Vehiculos pes;
+    while(global.lectura >> vehiculo >> chofer >> envio )
+    {
+        pes.SetVehiculo(vehiculo);
+        pes.SetChofer(chofer);
+        pes.SetEnvio(envio);
+        cerrados.push_back(pes);
+
+    }
+    global.lectura.close();
+
+    return cerrados;
+}
+
+//************************************MANTENIMIENTO PAQUETESXVEHICULO*************************************
+
+
+//************************************ESPACIO*************************************
+//Este método guarda todos los paquetes que estan pendientes por enviar
+bool  grabarEnviados(vector<int> enviados)
+{
+    bool resultado=false;
+
+    globales global;
+
+    global.escritura.open(global.archivoEnviados,ios::out);
+
+
+    if(global.escritura.fail())
+    {
+        cout <<"No se pudo abrir el archivo";
+        exit(1);
+    }
+
+    for(int e:enviados)
+    {
+        global.escritura
+                << to_string(e) <<' ';
+    }
+
+
+    global.escritura.flush();
+    global.escritura.close();
+    resultado=true;
+
+
+    return resultado;
+}
+//Este método carga los paquetes que estan pendientes de enviar
+vector<int> cargarEnviados()
+{
+    globales global;
+    vector<int> enviados;
+    global.lectura.open(global.archivoEnviados,ios::in);
+    if(global.lectura.fail())
+    {
+        cout << "No se pudo abrir el archivo";
+        exit(1);
+    }
+    string env;
+    while(global.lectura >> env )
+    {
+        enviados.push_back(stoi(env));
+
+    }
+    global.lectura.close();
+
+    return enviados;
+}
+//Este método graba los datos del espacio que ocupan actualmente los paquetes pendientes de envío
+bool  grabarEspacio(float espacio)
+{
+    bool resultado=false;
+
+    globales global;
+
+    global.escritura.open(global.archivoEspacio,ios::out);
+
+
+    if(global.escritura.fail())
+    {
+        cout <<"No se pudo abrir el archivo";
+        exit(1);
+    }
+
+
+    global.escritura
+            << espacio;
+
+    global.escritura.flush();
+    global.escritura.close();
+    resultado=true;
+
+
+    return resultado;
+}
+//Este método devuelve el espacio ocupado actualmente por los paquetes
+//pendientes de envío con el fin de validar cuanto espacio queda
+string cargarEspacio()
+{
+    globales global;
+    string space;
+    global.lectura.open(global.archivoEspacio,ios::in);
+    if(global.lectura.fail())
+    {
+        cout << "No se pudo abrir el archivo";
+        exit(1);
+    }
+    string espacio;
+    while(global.lectura >> espacio )
+    {
+        space=espacio;
+
+    }
+    global.lectura.close();
+
+    return space;
+}
+//************************************ESPACIO*************************************
+
 //************************************MANTENIMIENTO CLIENTES*************************************
+//Modifica los datos de un cliente
 void modificarCliente()
 {
     string id;
@@ -141,8 +328,8 @@ void modificarCliente()
                     apellidos=quitarEspaciosEnBlanco(apellidos);
                     c.SetApellidos(apellidos);
                 }
-                cout << "\nLa direccion actual del cliente es : "<<c.GetDireccion()<<endl;
-                cout << "Digite la nueva direccion o presione enter para mantener la misma direccion"<<endl;
+                cout << "\nLa dirección actual del cliente es : "<<c.GetDireccion()<<endl;
+                cout << "Digite la nueva dirección o presione enter para mantener la misma dirección"<<endl;
                 getline(cin,direccion);
                 if(esCadenaValida(direccion))
                 {
@@ -157,8 +344,8 @@ void modificarCliente()
                     email=quitarEspaciosEnBlanco(email);
                     c.SetEmail(email);
                 }
-                cout << "\nEl telefono actual del cliente es : "<<c.GetTelefono()<<endl;
-                cout << "Digite el nuevo telefono o presione enter para mantener el mismo telefono"<<endl;
+                cout << "\nEl teléfono actual del cliente es : "<<c.GetTelefono()<<endl;
+                cout << "Digite el nuevo teléfono o presione enter para mantener el mismo teléfono"<<endl;
                 getline(cin,telefono);
                 if(esCadenaValida(telefono))
                 {
@@ -193,6 +380,7 @@ void modificarCliente()
     }
 
 }
+//Elimina de un vector los datos de un cliente
 vector<Cliente> removerCliente(vector<Cliente> clientes,Cliente aborrar)
 {
     vector<Cliente> aux;
@@ -205,6 +393,7 @@ vector<Cliente> removerCliente(vector<Cliente> clientes,Cliente aborrar)
     }
     return aux;
 }
+//Carga los clientes, elimina el cliente de memoria y posteriormente sobreescribe los datos en el archivo
 void eliminarCliente()
 {
     string id;
@@ -250,6 +439,7 @@ void eliminarCliente()
         cout << "El dato ingresado no es válido"<<endl;
     }
 };
+//Busca un cliente cargando los datos en memoria
 void buscarCliente()
 {
     string id;
@@ -292,6 +482,7 @@ void buscarCliente()
         cout << "El dato ingresado no es válido"<<endl;
     }
 }
+//Muestra todos los clientes existentes
 void listarClientes()
 {
     vector<Cliente> clientes=cargarClientes();
@@ -314,7 +505,7 @@ void listarClientes()
 
 
 }
-
+//Carga los datos del archivo de clientes
 vector<Cliente> cargarClientes()
 {
     globales global;
@@ -348,7 +539,7 @@ vector<Cliente> cargarClientes()
     return clientes;
 }
 
-
+//Valida si un cliente existe
 bool busquedaCliente(vector<Cliente> clientes,string dato)
 {
     dato=quitarEspaciosEnBlanco(dato);
@@ -366,7 +557,7 @@ bool busquedaCliente(vector<Cliente> clientes,string dato)
 }
 
 
-
+//Devuelve los datos de la busqueda de un cliente
 Cliente RetornarbusquedaCliente(vector<Cliente> clientes,string buscado)
 {
     buscado=quitarEspaciosEnBlanco(buscado);
@@ -383,7 +574,7 @@ Cliente RetornarbusquedaCliente(vector<Cliente> clientes,string buscado)
 
     return cliente;
 }
-
+//Guarda los clientes en memoria en el archivo de clientes
 bool  grabarClientes(vector<Cliente> clientes)
 {
     bool resultado=false;
@@ -395,7 +586,7 @@ bool  grabarClientes(vector<Cliente> clientes)
 
     if(global.escritura.fail())
     {
-        cout <<"no se pudo abrir el archivo";
+        cout <<"No se pudo abrir el archivo";
         exit(1);
     }
 
@@ -417,6 +608,7 @@ bool  grabarClientes(vector<Cliente> clientes)
 
     return resultado;
 }
+//Solicita los datos al usuario para agregar un cliente al archivo
 void ingresoCliente()
 {
 
@@ -519,6 +711,9 @@ void ingresoCliente()
 
 
 //************************************MANTENIMIENTO CHOFERES*************************************
+//NOTA :SOLO SE PERMITE MODIFICAR LA LICENCIA Y EL ESTADO SEGÚN INDICA EL PDF DEL PROYECTO.
+
+//Modifica los datos de un chofer
 void modificarChofer()
 {
     string id;
@@ -527,7 +722,7 @@ void modificarChofer()
     string numero;
     string estado;
     string tipo;
-    cout << "Ingrese el número de identificacion del chofer que desea modificar"<<endl;
+    cout << "Ingrese el número de identificación del chofer que desea modificar"<<endl;
     getline(cin,id);
     if(esCadenaValida(id))
     {
@@ -542,7 +737,7 @@ void modificarChofer()
                 vector<Chofer> chofersXGrabar=removerChofer(chofers,c);
                 cout<< "\nEl tipo de licencia actual del chofer es : "<<c.GetTipoLicencia()<<endl;
                 cout << "Digite el nuevo tipo de licencia o presione enter para mantener el mismo tipo."
-                     <<"Los valores validos son: B2,E2";
+                     <<"Los valores válidos son: B2,E2";
                 getline(cin,tipo);
                 if(esCadenaValida(tipo))
                 {
@@ -594,6 +789,7 @@ void modificarChofer()
         cout << "El dato ingresado no es válido"<<endl;
     }
 }
+//Elimina un chofer en memoria
 vector<Chofer> removerChofer(vector<Chofer> chofers,Chofer aborrar)
 {
     vector<Chofer> aux;
@@ -606,10 +802,11 @@ vector<Chofer> removerChofer(vector<Chofer> chofers,Chofer aborrar)
     }
     return aux;
 }
+//Elimina un chofer del archivo
 void eliminarChofer()
 {
     string id;
-    cout << "Ingrese el número de identificacion del chofer que desea eliminar"<<endl;
+    cout << "Ingrese el número de identificación del chofer que desea eliminar"<<endl;
     getline(cin,id);
     if(esCadenaValida(id))
     {
@@ -626,7 +823,7 @@ void eliminarChofer()
                 bool grabado=grabarChofers(chofersXGrabar);
                 if(grabado)
                 {
-                    cout << "El chofer con el numero : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
+                    cout << "El chofer con el número : "<<c.GetIdentificacion()<<" ha sido eliminado satisfactoriamente"<<endl;
                 }
                 else
                 {
@@ -635,12 +832,12 @@ void eliminarChofer()
             }
             else
             {
-                cout << "No se encontró ningún chofer con el numero de identificacion: "<<id<<endl;
+                cout << "No se encontró ningún chofer con el número de identificacion: "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún chofer con el numero de identificacion: "<<id<<endl;
+            cout << "No se encontró ningún chofer con el número de identificación: "<<id<<endl;
         }
 
 
@@ -650,10 +847,11 @@ void eliminarChofer()
         cout << "El dato ingresado no es válido"<<endl;
     }
 };
+//Busca un chofer
 void buscarChofer()
 {
     string id;
-    cout << "Ingrese el número de identificacion  del chofer que desea buscar"<<endl;
+    cout << "Ingrese el número de identificación  del chofer que desea buscar"<<endl;
     getline(cin,id);
     if(esCadenaValida(id))
     {
@@ -669,19 +867,19 @@ void buscarChofer()
                         << "\nIdentificación : "<<c.GetIdentificacion()
                         << "\nNombre : "<<c.GetNombre()
                         << "\nApellidos : "<<c.GetApellidos()
-                        << "\nNumero : "<<c.GetNumero()
+                        << "\nNúmero : "<<c.GetNumero()
                         << "\nEstado : "<<c.GetEstado()
                         << "\nTipo de licencia : "<<c.GetTipoLicencia()
                         <<endl;
             }
             else
             {
-                cout << "No se encontró ningún chofer con el numero  : "<<id<<endl;
+                cout << "No se encontró ningún chofer con el número  : "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún chofer con el numero  : "<<id<<endl;
+            cout << "No se encontró ningún chofer con el número  : "<<id<<endl;
         }
 
 
@@ -691,6 +889,7 @@ void buscarChofer()
         cout << "El dato ingresado no es válido"<<endl;
     }
 }
+//Muestra los datos de los choferes
 void listarChofers()
 {
     vector<Chofer> chofers=cargarChofers();
@@ -701,19 +900,19 @@ void listarChofers()
             cout << "\nIdentificación : " << c.GetIdentificacion()
                  <<"\nNombre : "<< c.GetNombre()
                  <<"\nApellidos : "<<c.GetApellidos()
-                 <<"\nNumero : "<<c.GetNumero()
+                 <<"\nNúmero : "<<c.GetNumero()
                  <<"\nEstado : "<<c.GetEstado()
                  <<"\nTipo de licencia : "<< c.GetTipoLicencia()<< endl;
         }
     }
     else
     {
-        cout << "No hay chofers que mostrar"<<endl;
+        cout << "No hay choferes que mostrar"<<endl;
     }
 
 
 }
-
+//Carga los choferes del archivo
 vector<Chofer> cargarChofers()
 {
     globales global;
@@ -747,7 +946,7 @@ vector<Chofer> cargarChofers()
     return chofers;
 }
 
-
+//Valida si existe un chofer
 bool busquedaChofer(vector<Chofer> chofers,string dato)
 {
     bool resultado=false;
@@ -763,9 +962,7 @@ bool busquedaChofer(vector<Chofer> chofers,string dato)
 
     return resultado;
 }
-
-
-
+//Retorna los datos de un chofer
 Chofer RetornarbusquedaChofer(vector<Chofer> chofers,string buscado)
 {
     Chofer chofer;
@@ -781,7 +978,7 @@ Chofer RetornarbusquedaChofer(vector<Chofer> chofers,string buscado)
 
     return chofer;
 }
-
+//Guarda los choferes
 bool  grabarChofers(vector<Chofer> chofers)
 {
     bool resultado=false;
@@ -793,7 +990,7 @@ bool  grabarChofers(vector<Chofer> chofers)
 
     if(global.escritura.fail())
     {
-        cout <<"no se pudo abrir el archivo";
+        cout <<"No se pudo abrir el archivo";
         exit(1);
     }
 
@@ -815,6 +1012,7 @@ bool  grabarChofers(vector<Chofer> chofers)
 
     return resultado;
 }
+//Solicita los datos al usuario para guardar un chofer
 void ingresoChofer()
 {
     try
@@ -851,7 +1049,7 @@ void ingresoChofer()
                 {
                     apellidos=quitarEspaciosEnBlanco(apellidos);
                     cout <<"Ingrese el  tipo de licencia del chofer."
-                         << "Los valores validos son: B2,E2"<<endl;
+                         << "Los valores válidos son: B2,E2"<<endl;
                     getline(std::cin,tipo);
                     proceso=esCadenaValida(tipo)?true:false;
                     tipo=quitarEspaciosEnBlanco(tipo);
@@ -939,6 +1137,7 @@ void ingresoChofer()
 //************************************MANTENIMIENTO CHOFERES*************************************
 
 //************************************MANTENIMIENTO PAQUETES*************************************
+//Modifica los datos de un paquete
 void modificarPaquete()
 {
     string id;
@@ -961,8 +1160,8 @@ void modificarPaquete()
             {
                 Paquete c=RetornarbusquedaPaquete(paquetes,id);
                 vector<Paquete> paquetesXGrabar=removerPaquete(paquetes,c);
-                cout<< "\nLa identificacion del cliente que envia  es : "<<c.GetClienteEmisor()<<endl;
-                cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
+                cout<< "\nLa identificación del cliente que envía  es : "<<c.GetClienteEmisor()<<endl;
+                cout << "Digite el nuevo cliente o presione enter para mantener el mismo cliente"<<endl;
                 getline(cin,emisor);
                 if(esCadenaValida(emisor))
                 {
@@ -971,8 +1170,8 @@ void modificarPaquete()
                     c.SetClienteEmisor(emisor);
 
                 }
-                cout<< "\nLa identificacion del cliente que recibe  es : "<<c.GetClienteEmisor()<<endl;
-                cout << "Digite el nuevo nombre o presione enter para mantener el mismo nombre"<<endl;
+                cout<< "\nLa identificación del cliente que recibe  es : "<<c.GetClienteEmisor()<<endl;
+                cout << "Digite el nuevo cliente o presione enter para mantener el mismo cliente"<<endl;
                 getline(cin,receptor);
                 if(esCadenaValida(receptor))
                 {
@@ -993,7 +1192,7 @@ void modificarPaquete()
                     }
                     else
                     {
-                        cout <<"Se ingreso una fecha invalida"<<endl;
+                        cout <<"Se ingresó una fecha inválida"<<endl;
                     }
 
                 }
@@ -1002,7 +1201,7 @@ void modificarPaquete()
                 bool grabado=grabarPaquetes(paquetesXGrabar);
                 if(grabado)
                 {
-                    cout << "El paquete con el numero : " << c.GetNumeroEnvio() << " ha sido modificado satisfactoriamente" << endl;
+                    cout << "El paquete con el número : " << c.GetNumeroEnvio() << " ha sido modificado satisfactoriamente" << endl;
                 }
                 else
                 {
@@ -1011,12 +1210,12 @@ void modificarPaquete()
             }
             else
             {
-                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+                cout << "No se encontró ningún paquete con el número : "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+            cout << "No se encontró ningún paquete con el número : "<<id<<endl;
         }
 
 
@@ -1026,6 +1225,7 @@ void modificarPaquete()
         cout << "El dato ingresado no es válido"<<endl;
     }
 }
+//Elimina un paquete de memoria
 vector<Paquete> removerPaquete(vector<Paquete> paquetes,Paquete aborrar)
 {
     vector<Paquete> aux;
@@ -1038,6 +1238,7 @@ vector<Paquete> removerPaquete(vector<Paquete> paquetes,Paquete aborrar)
     }
     return aux;
 }
+//Elimina un paquete del archivo
 void eliminarPaquete()
 {
     string id;
@@ -1056,7 +1257,7 @@ void eliminarPaquete()
                 bool grabado=grabarPaquetes(paquetesXGrabar);
                 if(grabado)
                 {
-                    cout << "El paquete con el numero : "<<c.GetNumeroEnvio()<<" ha sido eliminado satisfactoriamente"<<endl;
+                    cout << "El paquete con el número : "<<c.GetNumeroEnvio()<<" ha sido eliminado satisfactoriamente"<<endl;
                 }
                 else
                 {
@@ -1065,12 +1266,12 @@ void eliminarPaquete()
             }
             else
             {
-                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+                cout << "No se encontró ningún paquete con el número : "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+            cout << "No se encontró ningún paquete con el número : "<<id<<endl;
         }
 
 
@@ -1080,6 +1281,224 @@ void eliminarPaquete()
         cout << "El dato ingresado no es válido"<<endl;
     }
 };
+//Realiza el cierre, asignando los paquetes a los vehículos
+void asignacionPaquetesXVehiculo(vector<int> enviados)
+{
+    globales global;
+
+    vector<Paquete> paquetes=cargarPaquetes();
+    vector<Paquete> paquetesAProcesar;
+
+    global.lectura.open(global.archivoEnvios,ios::in);
+    if(global.lectura.fail())
+    {
+        global.escritura.open(global.archivoEnvios,ios::out);
+        if(global.escritura.fail())
+        {
+            cout <<"No se pudo crear el archivo de envíos";
+            exit(1);
+        }
+        else
+        {
+            global.escritura.close();
+        }
+    }
+    else
+    {
+        global.lectura.close();
+    }
+
+
+    for(int e:enviados)
+    {
+        for(Paquete p:paquetes)
+        {
+            if(to_string(e)==p.GetNumeroEnvio())
+            {
+                paquetesAProcesar.push_back(p);
+            }
+        }
+    }
+
+    int vehiculo=1;
+    float capacidad=0;
+    vector<Paquete> vehiculo1;
+    vector<Paquete> vehiculo2;
+    vector<Paquete> vehiculo3;
+    Chofer chofer1;
+    Chofer chofer2;
+    Chofer chofer3;
+
+    vector<Chofer> choferes;
+    choferes=cargarChofers();
+
+    if(choferes.size()>2)
+    {
+        // asignar choferes
+        int chofer=1;
+        for(Chofer c:choferes)
+        {
+            if(c.GetEstado()=="1")
+            {
+                switch(chofer)
+                {
+                case 1:
+                    chofer1=c;
+                    break;
+                case 2:
+                    chofer2=c;
+                    break;
+                case 3:
+                    chofer3=c;
+                    break;
+                default:
+                    break;
+                }
+                chofer++;
+            }
+        }
+        //asignar paquetes a los vehiculos
+        for(Paquete p:paquetesAProcesar)
+        {
+            float peso=stof(p.GetPeso());
+            capacidad=capacidad+peso;
+
+            if(peso<=1000&&capacidad<=1000)
+            {
+                switch(vehiculo)
+                {
+                case 1:
+                    vehiculo1.push_back(p);
+                    break;
+                case 2:
+                    vehiculo2.push_back(p);
+                    break;
+                case 3:
+                    vehiculo3.push_back(p);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else
+            {
+                capacidad=0;
+                vehiculo++;
+                capacidad=capacidad+peso;
+                switch(vehiculo)
+                {
+                case 1:
+                    vehiculo1.push_back(p);
+                    break;
+                case 2:
+                    vehiculo2.push_back(p);
+                    break;
+                case 3:
+                    vehiculo3.push_back(p);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        vector<Paquetes_Vehiculos> paquetesVehiculos=cargarCierre();
+         vector<Paquetes_Vehiculos> procesados;
+        Paquetes_Vehiculos paqueteVehiculo;
+
+        for(Paquete p:vehiculo1)
+        {
+            paqueteVehiculo.SetVehiculo("1");
+            paqueteVehiculo.SetChofer(chofer1.GetNumero());
+            paqueteVehiculo.SetEnvio(p.GetNumeroEnvio());
+            procesados.push_back(paqueteVehiculo);
+            paquetesVehiculos.push_back(paqueteVehiculo);
+
+        }
+        for(Paquete p:vehiculo2)
+        {
+            paqueteVehiculo.SetVehiculo("2");
+            paqueteVehiculo.SetChofer(chofer2.GetNumero());
+            paqueteVehiculo.SetEnvio(p.GetNumeroEnvio());
+             procesados.push_back(paqueteVehiculo);
+            paquetesVehiculos.push_back(paqueteVehiculo);
+        }
+        for(Paquete p:vehiculo3)
+        {
+            paqueteVehiculo.SetVehiculo("3");
+            paqueteVehiculo.SetChofer(chofer3.GetNumero());
+            paqueteVehiculo.SetEnvio(p.GetNumeroEnvio());
+             procesados.push_back(paqueteVehiculo);
+            paquetesVehiculos.push_back(paqueteVehiculo);
+        }
+
+        bool guardado=grabarCierre(paquetesVehiculos);
+
+        float pesoTotal=0;
+        float ganancia=0;
+        if(guardado)
+        {
+            for(Paquetes_Vehiculos pv:procesados)
+            {
+                cout<<"Vehículo: "<<pv.GetVehiculo()<<endl;
+                cout<<"Chofer asignado: "<<pv.GetChofer()<<endl;
+                cout<<"Paquete asignado: "<<pv.GetEnvio()<<endl;
+                Paquete paq=RetornarbusquedaPaquete(paquetes,pv.GetEnvio());
+                pesoTotal=pesoTotal+stof(paq.GetPeso());
+                ganancia=ganancia+stof(paq.GetMonto());
+                cout<<"Peso del paquete: "<<paq.GetPeso()<<endl;
+
+            }
+
+            cout<<"Total de paquetes enviados: "<<paquetesVehiculos.size()<<endl;
+            cout<<"Peso total de paquetes enviados: "<<pesoTotal<<endl;
+            cout<<"Ganancia total de paquetes enviados: "<<ganancia<<endl;
+
+            borrarEspacioYPendientes();
+        }
+        else
+        {
+            cout <<"Un error desconocido ha sucedido por lo que no fue posible guardar los datos del cierre"<<endl;
+        }
+
+
+    }
+    else
+    {
+        cout <<"No existe la cantidad mínima de choferes para asignarlos en el cierre. Por favor agregue más choferes"<<endl;
+    }
+
+
+
+
+}
+//Borra los datos del archivo de espacio y pendientes para permitir realizar otros envíos
+void borrarEspacioYPendientes()
+{
+    globales global;
+    global.escritura.open(global.archivoEspacio,ios::out);
+    if(global.escritura.fail())
+    {
+        cout <<"No se pudo crear el archivo de espacio";
+        exit(1);
+    }
+    else
+    {
+        global.escritura.close();
+    }
+
+    global.escritura.open(global.archivoEnviados,ios::out);
+    if(global.escritura.fail())
+    {
+        cout <<"No se pudo crear el archivo de enviados";
+        exit(1);
+    }
+    else
+    {
+        global.escritura.close();
+    }
+}
+//Busca un paquete
 void buscarPaquete()
 {
     string id;
@@ -1095,9 +1514,9 @@ void buscarPaquete()
             {
                 Paquete c=RetornarbusquedaPaquete(paquetes,id);
                 cout
-                        << "\nNumero de paquete : "<<c.GetNumeroEnvio()
-                        << "\nFecha de creacion : "<<c.GetFechaRegistro()
-                        << "\nCliente que envia : "<<c.GetClienteEmisor()
+                        << "\nNúmero de paquete : "<<c.GetNumeroEnvio()
+                        << "\nFecha de creación : "<<c.GetFechaRegistro()
+                        << "\nCliente que envía : "<<c.GetClienteEmisor()
                         << "\nCliente que recibe : "<<c.GetClienteReceptor()
                         << "\nPeso: "<<c.GetPeso()
                         << "\nMonto : "<<c.GetMonto()
@@ -1105,12 +1524,12 @@ void buscarPaquete()
             }
             else
             {
-                cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+                cout << "No se encontró ningún paquete con el número : "<<id<<endl;
             }
         }
         else
         {
-            cout << "No se encontró ningún paquete con el numero : "<<id<<endl;
+            cout << "No se encontró ningún paquete con el número : "<<id<<endl;
         }
 
 
@@ -1120,6 +1539,7 @@ void buscarPaquete()
         cout << "El dato ingresado no es válido"<<endl;
     }
 }
+//Muestra los datos de todos los paquetes del archivo
 void listarPaquetes()
 {
     vector<Paquete> paquetes=cargarPaquetes();
@@ -1128,8 +1548,8 @@ void listarPaquetes()
         for(Paquete c:paquetes)
         {
             cout
-                    << "\nNumero de paquete : "<<c.GetNumeroEnvio()
-                    << "\nFecha de creacion : "<<c.GetFechaRegistro()
+                    << "\nNúmero de paquete : "<<c.GetNumeroEnvio()
+                    << "\nFecha de creación : "<<c.GetFechaRegistro()
                     << "\nCliente que envia : "<<c.GetClienteEmisor()
                     << "\nCliente que recibe : "<<c.GetClienteReceptor()
                     << "\nPeso: "<<c.GetPeso()
@@ -1144,7 +1564,7 @@ void listarPaquetes()
 
 
 }
-
+//Carga los paquetes del archivo
 vector<Paquete> cargarPaquetes()
 {
     globales global;
@@ -1178,7 +1598,7 @@ vector<Paquete> cargarPaquetes()
     return paquetes;
 }
 
-
+//Busca un paquete
 bool busquedaPaquete(vector<Paquete> paquetes,string dato)
 {
     bool resultado=false;
@@ -1193,9 +1613,7 @@ bool busquedaPaquete(vector<Paquete> paquetes,string dato)
 
     return resultado;
 }
-
-
-
+//Retorna los datos de un paquete
 Paquete RetornarbusquedaPaquete(vector<Paquete> paquetes,string buscado)
 {
     Paquete paquete;
@@ -1210,7 +1628,7 @@ Paquete RetornarbusquedaPaquete(vector<Paquete> paquetes,string buscado)
 
     return paquete;
 }
-
+//Guarda los datos de los paquetes
 bool  grabarPaquetes(vector<Paquete> paquetes)
 {
     bool resultado=false;
@@ -1222,7 +1640,7 @@ bool  grabarPaquetes(vector<Paquete> paquetes)
 
     if(global.escritura.fail())
     {
-        cout <<"no se pudo abrir el archivo";
+        cout <<"No se pudo abrir el archivo";
         exit(1);
     }
 
@@ -1244,6 +1662,7 @@ bool  grabarPaquetes(vector<Paquete> paquetes)
 
     return resultado;
 }
+//Agrega un paquete solicitándole los datos al usuario
 void ingresoPaquete()
 {
     cin.sync();
@@ -1262,7 +1681,7 @@ void ingresoPaquete()
         vector<Cliente> clientes;
         bool proceso=false;
         globales global;
-        cout <<"Ingrese la identificacion del cliente que envia el paquete"<<endl;
+        cout <<"Ingrese la identificación del cliente que envía el paquete"<<endl;
         getline(std::cin,emisor);
         proceso=esCadenaValida(emisor)?true:false;
         if(proceso)
@@ -1294,7 +1713,7 @@ void ingresoPaquete()
                 else
                 {
                     proceso=false;
-                    cout <<"Se ingreso un valor invalido"<< endl;
+                    cout <<"Se ingreso un valor inválido"<< endl;
                 }
 
             }
@@ -1310,7 +1729,7 @@ void ingresoPaquete()
                     proceso=ValidarSiEsFecha(fecha);
                     if(proceso)
                     {
-                        cout <<"Ingrese la identificacion del cliente que recibe el paquete"<<endl;
+                        cout <<"Ingrese la identificación del cliente que recibe el paquete"<<endl;
                         getline(std::cin,receptor);
                         proceso=esCadenaValida(receptor)?true:false;
                         receptor=quitarEspaciosEnBlanco(receptor);
@@ -1339,14 +1758,14 @@ void ingresoPaquete()
                             else
                             {
                                 proceso=false;
-                                cout <<"Se ingreso un valor invalido"<< endl;
+                                cout <<"Se ingreso un valor inválido"<< endl;
                             }
 
                         }
 
                         if(proceso)
                         {
-                            cout <<"Ingrese el  peso del paquete en kilogramos por favor.El peso limite son 1000 kilos"<<endl;
+                            cout <<"Ingrese el  peso del paquete en kilogramos por favor.El peso límite son 1000 kilos"<<endl;
                             getline(std::cin,peso);
                             proceso=esCadenaValida(peso)?true:false;
 
@@ -1356,18 +1775,19 @@ void ingresoPaquete()
 
                                 if(proceso)
                                 {
+                                    string spaceString=cargarEspacio();
 
-                                    float espacio=(global.espacioMaximo)-(global.espacioParaTransportar);
+                                    float espacio=spaceString.empty()?0:std::stof(spaceString);
 
-                                    if(espacio>0)
+                                    if(espacio<global.espacioMaximo)
                                     {
                                         pesoFloat=std::stof(peso);
                                         if(pesoFloat<=1000)
                                         {
-                                            if(pesoFloat<=espacio)
+                                            if((pesoFloat+espacio)<=global.espacioMaximo)
                                             {
-                                                global.espacioParaTransportar=
-                                                    global.espacioParaTransportar+pesoFloat;
+                                                float nuevoEspacio=(pesoFloat+espacio);
+                                                grabarEspacio(nuevoEspacio);
 
                                                 if(pesoFloat<1)
                                                 {
@@ -1403,6 +1823,9 @@ void ingresoPaquete()
 
                                                 paquetes.push_back(paquete);
                                                 bool registrado=grabarPaquetes(paquetes);
+                                                vector<int> losenviados= cargarEnviados();
+                                                losenviados.push_back(autoincremento);
+                                                grabarEnviados(losenviados);
                                                 if(registrado)
                                                 {
                                                     cout<<"El paquete "<<paquete.GetNumeroEnvio() <<" ha sido registrado satisfactoriamente."<<endl;
@@ -1422,7 +1845,7 @@ void ingresoPaquete()
                                         }
                                         else
                                         {
-                                            cout << "El peso ingresado es invalido"<<endl;
+                                            cout << "El peso ingresado es inválido"<<endl;
                                             proceso=false;
                                         }
                                     }
@@ -1435,28 +1858,33 @@ void ingresoPaquete()
                                 else
                                 {
                                     proceso=false;
+                                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
                                 }
 
                             }
                             else
                             {
                                 proceso=false;
+                                cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
                             }
 
                         }
                         else
                         {
                             proceso=false;
+                            cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
                         }
                     }
                     else
                     {
                         proceso=false;
+                        cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
                     }
                 }
                 else
                 {
                     proceso=false;
+                    cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
                 }
 
 
@@ -1464,6 +1892,7 @@ void ingresoPaquete()
             else
             {
                 proceso=false;
+                cout << "Lo sentimos, se ingresaron datos incorrectos.Por favor revise los datos e intente de nuevo"<<endl;
             }
 
 
@@ -1488,7 +1917,7 @@ void ingresoPaquete()
 
 
 //************************************UTILITARIOS*************************************
-
+//Método para validar si una cadena es un float
 bool ValidarSiEsFloat(string cadena)
 {
     bool EsNumero=true;
@@ -1504,6 +1933,7 @@ bool ValidarSiEsFloat(string cadena)
 
     return EsNumero;
 }
+//Método para validar que una cédula sea válida
 bool ValidarSiEsCedula(string cadena)
 {
     bool EsNumero=true;
@@ -1528,6 +1958,7 @@ bool ValidarSiEsCedula(string cadena)
 
     return EsNumero;
 }
+//Verifica que una cadena sea un  número entero
 bool ValidarSiEsEntero(string cadena)
 {
     bool EsNumero=true;
@@ -1548,6 +1979,7 @@ bool ValidarSiEsEntero(string cadena)
 
     return EsNumero;
 }
+//Verifica que una cadena no tenga espacios en blanco y no sea una cadena vacía
 bool esCadenaValida(string dato)
 {
     if(dato.empty())
@@ -1581,6 +2013,7 @@ bool esCadenaValida(string dato)
 
     }
 }
+//Verifica que una cadena sea una fecha con el formato correcto (dd/mm/yyyy)
 bool ValidarSiEsFecha(string cadena)
 {
     bool proceso=false;
@@ -1596,11 +2029,13 @@ bool ValidarSiEsFecha(string cadena)
     }
     return proceso;
 }
+//Quita los espacios en blanco de una cadena
 string quitarEspaciosEnBlanco(string cadena)
 {
     std::remove_if(cadena.begin(), cadena.end(), ::isspace);
     return cadena;
 }
+//Verifica que sea un estado válido para los choferes
 bool ValidarSiEsEstado(string cadena)
 {
     bool proceso=true;
@@ -1631,6 +2066,7 @@ bool ValidarSiEsEstado(string cadena)
 
     return proceso;
 }
+//Verifica que una cadena sea un tipo de licencia permitido
 bool ValidarSiEsLicencia(string cadena)
 {
     bool proceso=true;
@@ -1653,6 +2089,7 @@ bool ValidarSiEsLicencia(string cadena)
 
     return proceso;
 }
+//Verifica que un archivo ya tiene datos para no borrarlo o también para crearlo si no existe
 void inicializarArchivos()
 {
     globales global;
@@ -1663,7 +2100,7 @@ void inicializarArchivos()
         global.escritura.open(global.archivoClientes,ios::out);
         if(global.escritura.fail())
         {
-            cout <<"no se pudo crear el archivo de clientes";
+            cout <<"No se pudo crear el archivo de clientes";
             exit(1);
         }
         else
@@ -1676,6 +2113,42 @@ void inicializarArchivos()
         global.lectura.close();
     }
 
+    global.lectura.open(global.archivoEnviados,ios::in);
+    if(global.lectura.fail())
+    {
+        global.escritura.open(global.archivoEnviados,ios::out);
+        if(global.escritura.fail())
+        {
+            cout <<"No se pudo crear el archivo de enviados";
+            exit(1);
+        }
+        else
+        {
+            global.escritura.close();
+        }
+    }
+    else
+    {
+        global.lectura.close();
+    }
+    global.lectura.open(global.archivoEspacio,ios::in);
+    if(global.lectura.fail())
+    {
+        global.escritura.open(global.archivoEspacio,ios::out);
+        if(global.escritura.fail())
+        {
+            cout <<"No se pudo crear el archivo de espacio";
+            exit(1);
+        }
+        else
+        {
+            global.escritura.close();
+        }
+    }
+    else
+    {
+        global.lectura.close();
+    }
 
     global.lectura.open(global.archivoChoferes,ios::in);
     if(global.lectura.fail())
@@ -1683,7 +2156,7 @@ void inicializarArchivos()
         global.escritura.open(global.archivoChoferes,ios::out);
         if(global.escritura.fail())
         {
-            cout <<"no se pudo crear el archivo de choferes";
+            cout <<"No se pudo crear el archivo de choferes";
             exit(1);
         }
         else
@@ -1703,7 +2176,7 @@ void inicializarArchivos()
         global.escritura.open(global.archivoPaquetes,ios::out);
         if(global.escritura.fail())
         {
-            cout <<"no se pudo crear el archivo de paquetes";
+            cout <<"No se pudo crear el archivo de paquetes";
             exit(1);
         }
         else
@@ -1720,7 +2193,87 @@ void inicializarArchivos()
 //************************************UTILITARIOS*************************************
 
 
+//************************************REPORTES*************************************
+//Reporte de paquetes por vehículo
+void reportePaquetesXVehiculo()
+{
+    vector<Paquetes_Vehiculos> pes=cargarCierre();
+
+    if(pes.size()>0)
+    {
+        cout <<"-----------------Reporte de paquetes por vehículo---------------"<<endl;
+        for(Paquetes_Vehiculos pv:pes)
+        {
+            cout <<"Vehículo: "<<pv.GetVehiculo()<<endl;
+            cout <<"Chofer: "<<pv.GetChofer()<<endl;
+            cout <<"Paquete: "<<pv.GetEnvio()<<endl;
+            cout <<"------------------------------------------------------------"<<endl;
+        }
+    }
+    else
+    {
+        cout <<"No hay datos para realizar el reporte"<<endl;
+    }
+
+}
+//Reporte de totales
+void reporteTotales()
+{
+    vector<Paquetes_Vehiculos> pes=cargarCierre();
+
+    vector<Paquete> paquetes=cargarPaquetes();
+    if(pes.size()>0)
+    {
+        cout <<"-----------------Reporte de Totales---------------"<<endl;
+        float peso=0;
+        float monto=0;
+        for(Paquetes_Vehiculos pv:pes)
+        {
+            Paquete p=RetornarbusquedaPaquete(paquetes,pv.GetEnvio());
+            peso=peso+stof(p.GetPeso());
+            monto=monto+stof(p.GetMonto());
+
+        }
+
+        cout <<"Peso total enviado de todos los paquetes: "<<peso<<"--------"<<endl;
+        cout <<"Ganancia total  de todos los paquetes  : "<<monto<<"--------"<<endl;
+        cout <<"------------------------------------------------------------"<<endl;
+    }
+    else
+    {
+        cout <<"No hay datos para realizar el reporte"<<endl;
+    }
+}
+//************************************REPORTES*************************************
+
 //************************************PROCESAMIENTO DE DATOS*************************************
+//Realiza un acción de acuerdo a la opción elegida por el usuario
+void ProcesamientoDeDatosSubmenuReportes(int eleccion)
+{
+    cin.sync();
+    switch (eleccion)
+    {
+    case 1:
+    {
+        reportePaquetesXVehiculo();
+    }
+    break;
+    case 2:
+    {
+        reporteTotales();
+    }
+    break;
+    case 3:
+        // no se hace nada solo vuelve al menu principal
+        break;
+    default:
+        cout << "Solicitud desconocida\n\n\n";
+        break;
+    }
+
+
+}
+//Realiza un acción de acuerdo a la opción elegida por el usuario
 void ProcesamientoDeDatosSubmenuClientes(int eleccion)
 {
     cin.sync();
@@ -1733,7 +2286,7 @@ void ProcesamientoDeDatosSubmenuClientes(int eleccion)
         {
             cin.sync();
             ingresoCliente();
-            cout << "Desea ingresar mas clientes? S/N" << endl;
+            cout << "Desea ingresar más clientes? S/N" << endl;
             cin >> seguir;
         }
         while(seguir=="S" || seguir=="s");
@@ -1757,6 +2310,9 @@ void ProcesamientoDeDatosSubmenuClientes(int eleccion)
     case 5:
         eliminarCliente();
         break;
+    case 6:
+        // no se hace nada solo vuelve al menu principal
+        break;
     default:
         cout << "Solicitud desconocida\n\n\n";
         break;
@@ -1764,7 +2320,7 @@ void ProcesamientoDeDatosSubmenuClientes(int eleccion)
 
 
 }
-
+//Realiza un acción de acuerdo a la opción elegida por el usuario
 void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
 {
     cin.sync();
@@ -1777,7 +2333,7 @@ void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
         {
             cin.sync();
             ingresoPaquete();
-            cout << "Desea ingresar mas paquetes? S/N" << endl;
+            cout << "Desea ingresar más paquetes? S/N" << endl;
             cin >> seguir;
 
         }
@@ -1797,6 +2353,9 @@ void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
     case 5:
         eliminarPaquete();
         break;
+    case 6:
+        // no se hace nada solo vuelve al menu principal
+        break;
     default:
         cout << "Solicitud desconocida\n\n\n";
         break;
@@ -1804,6 +2363,7 @@ void ProcesamientoDeDatosSubmenuPaquetes(int eleccion)
 
 
 }
+//Realiza un acción de acuerdo a la opción elegida por el usuario
 void ProcesamientoDeDatosSubmenuChoferes(int eleccion)
 {
     cin.sync();
@@ -1816,7 +2376,7 @@ void ProcesamientoDeDatosSubmenuChoferes(int eleccion)
         {
             cin.sync();
             ingresoChofer();
-            cout << "Desea ingresar mas choferes? S/N" << endl;
+            cout << "Desea ingresar más choferes? S/N" << endl;
             cin >> seguir;
 
         }
@@ -1836,6 +2396,9 @@ void ProcesamientoDeDatosSubmenuChoferes(int eleccion)
     case 5:
         eliminarChofer();
         break;
+    case 6:
+        // no se hace nada solo vuelve al menu principal
+        break;
     default:
         cout << "Solicitud desconocida\n\n\n";
         break;
@@ -1843,6 +2406,7 @@ void ProcesamientoDeDatosSubmenuChoferes(int eleccion)
 
 
 }
+//Muestra un menú
 int MostrarMenu()
 {
     cin.sync();
@@ -1853,7 +2417,7 @@ int MostrarMenu()
     cout << "[1] Mantenimiento de choferes" << endl;
     cout << "[2] Mantenimiento de clientes" << endl;
     cout << "[3] Envío de paquetes" << endl;
-    cout << "[4] Cierre de envios" << endl;
+    cout << "[4] Cierre de envíos" << endl;
     cout << "[5] Reportes" << endl;
     cout << "[6] Salir" << endl;
     cin >> option;
@@ -1865,6 +2429,26 @@ int MostrarMenu()
     }
     return intOpcion;
 }
+//Muestra un menú
+int MostrarMenuReportes()
+{
+    cin.sync();
+    string option;
+    int intOpcion = 0;
+    cout << "////////////////////////////////////////////" << endl;
+    cout << "---------Pedro paquetes--------" << endl;
+    cout << "[1] Reporte de paquetes por vehículo" << endl;
+    cout << "[2] Reporte de totales" << endl;
+    cout << "[3] Volver al menú principal" << endl;
+    cin >> option;
+
+    if(ValidarSiEsEntero(option))
+    {
+        intOpcion=stoll(option);
+    }
+    return intOpcion;
+}
+//Muestra un menú
 int MostrarMenuClientes()
 {
     cin.sync();
@@ -1886,6 +2470,7 @@ int MostrarMenuClientes()
     }
     return intOpcion;
 }
+//Muestra un menú
 int MostrarMenuChoferes()
 {
     cin.sync();
@@ -1907,7 +2492,7 @@ int MostrarMenuChoferes()
     }
     return intOpcion;
 }
-
+//Muestra un menú
 int MostrarMenuPaquetes()
 {
     cin.sync();
@@ -1929,6 +2514,7 @@ int MostrarMenuPaquetes()
     }
     return intOpcion;
 }
+//Escucha las opciones elegidas por el usuario en el menú correspondiente
 void EscucharOpcionesClientes()
 {
     int solicitud=-1;
@@ -1939,6 +2525,18 @@ void EscucharOpcionesClientes()
     }
     while(solicitud != 6);
 }
+//Escucha las opciones elegidas por el usuario en el menú correspondiente
+void EscucharOpcionesReportes()
+{
+    int solicitud=-1;
+    do
+    {
+        solicitud=MostrarMenuReportes();
+        ProcesamientoDeDatosSubmenuReportes(solicitud);
+    }
+    while(solicitud != 3);
+}
+//Escucha las opciones elegidas por el usuario en el menú correspondiente
 void EscucharOpcionesPaquetes()
 {
     int solicitud=-1;
@@ -1949,6 +2547,7 @@ void EscucharOpcionesPaquetes()
     }
     while(solicitud != 6);
 }
+//Escucha las opciones elegidas por el usuario en el menú correspondiente
 void EscucharOpcionesChoferes()
 {
     int solicitud=-1;
@@ -1960,6 +2559,7 @@ void EscucharOpcionesChoferes()
     }
     while(solicitud != 6);
 }
+//Realiza una acción de acuerdo a una opción elegida
 void ProcesamientoDeDatos(int eleccion)
 {
     cin.sync();
@@ -1977,10 +2577,35 @@ void ProcesamientoDeDatos(int eleccion)
         EscucharOpcionesPaquetes();
         break;
     case 4:
-        cout << "Cierre de envios\n\n\n";
-        break;
+    {
+        cin.sync();
+        string realizar;
+        cout <<"Desea realizar el cierre de envíos? S/N"<<endl;
+        getline(cin,realizar);
+        if(esCadenaValida(realizar))
+        {
+            if(realizar=="S"||realizar=="s")
+            {
+                vector<int> enviados=cargarEnviados();
+                if(enviados.size()>0)
+                {
+                    asignacionPaquetesXVehiculo(enviados);
+                }
+                else
+                {
+                    cout <<"No hay paquetes por enviar"<<endl;
+                }
+            }
+        }
+        else
+        {
+            cout <<"Se ingreso un valor inválido"<<endl;
+        }
+
+    }
+    break;
     case 5:
-        cout << "Reportes\n\n\n";
+        EscucharOpcionesReportes();
         break;
     case 6:
         exit(1);
@@ -1992,6 +2617,7 @@ void ProcesamientoDeDatos(int eleccion)
 
 
 }
+//Escucha las opciones elegidas por el usuario
 void EscucharOpciones()
 {
     int solicitud=-1;
